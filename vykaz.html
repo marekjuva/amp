@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Moje AMP</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F2F2F0;
+  --surface: #FFFFFF;
+  --border: #E0DED8;
+  --text: #1A1917;
+  --muted: #7A7870;
+  --accent: #00C8E0;
+  --accent-dark: #0099AD;
+  --accent-light: #E0F8FB;
+  --accent-text: #006070;
+  --danger: #C0392B;
+  --warn-bg: #FEF3CD;
+  --warn-text: #856404;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* SCREENS */
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* PIN SCREEN */
+#pin-screen { align-items: center; justify-content: center; padding: 2rem; background: var(--bg); }
+.pin-wrap { width: 100%; max-width: 340px; }
+.pin-logo { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 2rem; text-align: center; }
+.pin-title { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+.pin-sub { font-size: 14px; color: var(--muted); margin-bottom: 2rem; }
+.pin-dots { display: flex; gap: 12px; justify-content: center; margin-bottom: 2rem; }
+.pin-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border); background: transparent; transition: all .15s; }
+.pin-dot.filled { background: var(--accent); border-color: var(--accent); }
+.pin-dot.error { background: var(--danger); border-color: var(--danger); }.pin-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.pin-key { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 18px; font-size: 20px; font-weight: 500; cursor: pointer; text-align: center; transition: all .1s; user-select: none; }
+.pin-key:active { transform: scale(0.95); background: var(--accent-light); }
+.pin-key.del { font-size: 16px; color: var(--muted); }
+.pin-key.empty { background: transparent; border-color: transparent; pointer-events: none; }
+.pin-error { text-align: center; font-size: 13px; color: var(--danger); margin-top: 1rem; min-height: 18px; }
+
+/* HEADER */
+.header { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 0.75rem 1.25rem; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 10; }
+.header-logo { width: 28px; height: 28px; background: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.header-back { width: 32px; height: 32px; border-radius: 50%; border: 0.5px solid var(--border); background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.header-title { font-size: 16px; font-weight: 600; flex: 1; }
+.header-sub { font-size: 12px; color: var(--muted); }
+
+/* MAIN CONTENT */
+.content { flex: 1; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; max-width: 500px; width: 100%; margin: 0 auto; }
+
+/* WORKER SCREEN */
+.greeting { padding: 1rem 0 0.5rem; }
+.greeting-name { font-size: 24px; font-weight: 600; }
+.greeting-date { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+.section-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+
+.card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+
+/* FORM */
+.form-group { padding: 14px 16px; border-bottom: 0.5px solid var(--border); }
+.form-group:last-child { border-bottom: none; }
+.form-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+.form-select, .form-input {
+  width: 100%; background: transparent; border: none; font-family: 'DM Sans', sans-serif;
+  font-size: 15px; color: var(--text); outline: none; -webkit-appearance: none; appearance: none;
+}
+.form-select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237A7870' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0 center; padding-right: 20px; }
+.form-input[type="number"] { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 500; }
+.hours-unit { font-size: 14px; color: var(--muted); }
+.hours-row { display: flex; align-items: baseline; gap: 6px; }
+.form-textarea { width: 100%; background: transparent; border: none; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); outline: none; resize: none; min-height: 56px; }
+.form-textarea::placeholder { color: var(--muted); }
+
+/* HOURS STEPPER */
+.stepper { display: flex; align-items: center; gap: 12px; }
+.stepper-btn { width: 36px; height: 36px; border-radius: 50%; border: 0.5px solid var(--border); background: var(--bg); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 400; color: var(--text); transition: all .1s; }
+.stepper-btn:active { background: var(--accent-light); }
+.stepper-val { font-family: 'DM Mono', monospace; font-size: 32px; font-weight: 500; min-width: 56px; text-align: center; }
+.stepper-unit { font-size: 14px; color: var(--muted); }
+
+/* DATE PICKER */
+.date-display { font-size: 15px; font-weight: 500; }
+
+/* SUBMIT BTN */
+.btn-submit { background: var(--accent); color: white; border: none; border-radius: var(--radius); padding: 16px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; transition: all .15s; }
+.btn-submit:active { transform: scale(0.98); opacity: .9; }
+.btn-submit:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+
+/* SUCCESS */
+.success-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; }
+.success-icon { width: 64px; height: 64px; background: var(--accent-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 1.5rem; }
+.success-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.success-sub { font-size: 14px; color: var(--muted); line-height: 1.6; }
+.btn-secondary { background: transparent; border: 0.5px solid var(--border); color: var(--text); border-radius: var(--radius); padding: 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; width: 100%; margin-top: 1.5rem; transition: all .1s; }
+.btn-secondary:active { background: var(--bg); }
+
+/* HISTORY */
+.history-item { padding: 12px 16px; border-bottom: 0.5px solid var(--border); display: flex; align-items: center; gap: 12px; }
+.history-item:last-child { border-bottom: none; }
+.history-date { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); min-width: 52px; }
+.history-info { flex: 1; }
+.history-zakaz { font-size: 13px; font-weight: 500; }
+.history-note { font-size: 12px; color: var(--muted); margin-top: 1px; }
+.history-hrs { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; color: var(--accent-text); }
+
+/* ADMIN SCREEN */
+.admin-tabs { display: flex; background: var(--surface); border-bottom: 0.5px solid var(--border); }
+.admin-tab { flex: 1; padding: 12px; text-align: center; font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); transition: all .15s; }
+.admin-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.admin-panel { display: none; }
+.admin-panel.active { display: block; }
+
+.stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+.stat-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; }
+.stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; font-weight: 600; margin-bottom: 6px; }
+.stat-value { font-size: 22px; font-weight: 600; }
+.stat-unit { font-size: 12px; color: var(--muted); font-weight: 400; }
+
+.filter-row { display: flex; gap: 8px; margin-bottom: 1rem; overflow-x: auto; padding-bottom: 4px; }
+.filter-chip { background: var(--surface); border: 0.5px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 13px; cursor: pointer; white-space: nowrap; transition: all .1s; }
+.filter-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+.log-row { padding: 11px 16px; border-bottom: 0.5px solid var(--border); display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.log-row:last-child { border-bottom: none; }
+.log-worker { font-size: 13px; font-weight: 500; }
+.log-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.log-right { text-align: right; }
+.log-hrs { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; }
+.log-cost { font-size: 12px; color: var(--muted); }
+
+.zakaz-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 10px; overflow: hidden; }
+.zakaz-header { padding: 12px 16px; border-bottom: 0.5px solid var(--border); }
+.zakaz-name { font-size: 14px; font-weight: 600; }
+.zakaz-id { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+.zakaz-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; padding: 10px 16px; gap: 8px; }
+.zakaz-stat { text-align: center; }
+.zakaz-stat .v { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; }
+.zakaz-stat .l { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); font-size: 14px; }
+
+/* NAV */
+.bottom-nav { background: var(--surface); border-top: 0.5px solid var(--border); display: flex; padding: 8px 0 max(8px, env(safe-area-inset-bottom)); }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px; cursor: pointer; color: var(--muted); font-size: 11px; transition: color .15s; }
+.nav-item.active { color: var(--accent); }
+.nav-icon { font-size: 20px; }
+
+/* LOGOUT */
+.btn-logout { background: transparent; border: none; color: var(--muted); font-size: 13px; cursor: pointer; padding: 8px 0; }
+</style>
+</head>
+<body>
+
+<!-- PIN SCREEN -->
+<div id="pin-screen" class="screen active">
+  <div class="pin-wrap">
+    <div class="pin-logo" style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:2rem">
+      <div style="width:32px;height:32px;background:#00C8E0;border-radius:6px;display:flex;align-items:center;justify-content:center">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 3L17 9V17H13V13H7V17H3V9L10 3Z" stroke="white" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+          <path d="M7 17V13H13V17" stroke="white" stroke-width="1.5" fill="none"/>
+        </svg>
+      </div>
+      <span style="font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;color:var(--text);letter-spacing:0">AMP Stav s.r.o.</span>
+    </div>
+    <div class="pin-title">Moje AMP</div>
+    <div class="pin-sub">Pro přihlášení zadej svůj PIN kód</div>
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+    </div>
+    <div class="pin-keypad">
+      <div class="pin-key" onclick="pinPress('1')">1</div>
+      <div class="pin-key" onclick="pinPress('2')">2</div>
+      <div class="pin-key" onclick="pinPress('3')">3</div>
+      <div class="pin-key" onclick="pinPress('4')">4</div>
+      <div class="pin-key" onclick="pinPress('5')">5</div>
+      <div class="pin-key" onclick="pinPress('6')">6</div>
+      <div class="pin-key" onclick="pinPress('7')">7</div>
+      <div class="pin-key" onclick="pinPress('8')">8</div>
+      <div class="pin-key" onclick="pinPress('9')">9</div>
+      <div class="pin-key empty"></div>
+      <div class="pin-key" onclick="pinPress('0')">0</div>
+      <div class="pin-key del" onclick="pinDel()">⌫</div>
+    </div>
+    <div class="pin-error" id="pin-error"></div>
+  </div>
+</div>
+
+<!-- WORKER SCREEN -->
+<div id="worker-screen" class="screen">
+  <div class="header">
+    <div class="header-logo">
+      <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M10 3L17 9V17H13V13H7V17H3V9L10 3Z" stroke="white" stroke-width="1.5" fill="none" stroke-linejoin="round"/></svg>
+    </div>
+    <div>
+      <div class="header-title" id="worker-header-name">Výkaz práce</div>
+      <div class="header-sub" id="worker-header-sub"></div>
+    </div>
+    <button class="btn-logout" onclick="logout()">Odhlásit</button>
+  </div>
+  <div class="admin-tabs">
+    <div class="admin-tab active" onclick="workerTab('log')">Zadat výkaz</div>
+    <div class="admin-tab" onclick="workerTab('history')">Moje záznamy</div>
+  </div>
+
+  <!-- LOG TAB -->
+  <div id="worker-log" class="admin-panel active">
+    <div class="content">
+      <div class="greeting">
+        <div class="greeting-name" id="greeting-name"></div>
+        <div class="greeting-date" id="greeting-date"></div>
+      </div>
+
+      <div>
+        <div class="section-label">Nový výkaz</div>
+        <div class="card">
+          <div class="form-group">
+            <div class="form-label">Zakázka</div>
+            <select class="form-select" id="w-zakaz">
+              <option value="">Vyber zakázku...</option>
+              <option value="2026-001">2026-001 — RD Hostěrádky-Rešov II. etapa</option>
+              <option value="2026-002">2026-002 — Byt Pekárenský dvůr</option>
+              <option value="2026-003">2026-003 — Byt Údolní</option>
+              <option value="2026-004">2026-004 — Byt Jaselská</option>
+              <option value="2026-005">2026-005 — DEK Depo</option>
+              <option value="2026-006">2026-006 — Fitness Třebíč</option>
+              <option value="2026-007">2026-007 — BD Boční Veverská Bítýška</option>
+              <option value="2026-008">2026-008 — RD Velešovice 124</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Datum</div>
+            <input type="date" class="form-select" id="w-datum" style="font-size:15px;font-weight:500;">
+          </div>
+          <div class="form-group">
+            <div class="form-label">Počet hodin</div>
+            <div class="stepper">
+              <button class="stepper-btn" onclick="stepHours(-0.5)">−</button>
+              <span class="stepper-val" id="w-hours-display">8</span>
+              <span class="stepper-unit">h</span>
+              <button class="stepper-btn" onclick="stepHours(0.5)">+</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Najeté km (volitelné)</div>
+            <div class="stepper">
+              <button class="stepper-btn" onclick="stepKm(-1)">−</button>
+              <span class="stepper-val" id="w-km-display">0</span>
+              <span class="stepper-unit">km</span>
+              <button class="stepper-btn" onclick="stepKm(1)">+</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Poznámka (volitelné)</div>
+            <textarea class="form-textarea" id="w-note" placeholder="Co jsi dělal, co bylo hotové..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-submit" id="w-submit" onclick="submitVykaz()">Odeslat výkaz</button>
+
+      <div style="margin-top:0.5rem">
+        <div class="section-label">Záloha</div>
+        <div class="card">
+          <div class="form-group">
+            <div class="form-label">Datum zálohy</div>
+            <input type="date" class="form-select" id="w-zaloha-datum" style="font-size:15px;font-weight:500;">
+          </div>
+          <div class="form-group">
+            <div class="form-label">Částka (Kč)</div>
+            <div class="stepper">
+              <button class="stepper-btn" onclick="stepZaloha(-500)">−</button>
+              <span class="stepper-val" id="w-zaloha-display" style="font-size:24px">1000</span>
+              <span class="stepper-unit">Kč</span>
+              <button class="stepper-btn" onclick="stepZaloha(500)">+</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn-submit" style="background:var(--danger);margin-top:10px" onclick="submitZaloha()">Zaznamenat zálohu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY TAB -->
+  <div id="worker-history" class="admin-panel">
+    <div class="content">
+      <div class="stat-row" style="grid-template-columns:1fr 1fr 1fr 1fr">
+        <div class="stat-card">
+          <div class="stat-label">Odpracováno</div>
+          <div class="stat-value" id="hist-month-hrs">0 <span class="stat-unit">h</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Kilometry</div>
+          <div class="stat-value" id="hist-month-km">0 <span class="stat-unit">km</span></div>
+        </div>
+        <div class="stat-card" style="background:#FCEBEB;border-color:#F09595">
+          <div class="stat-label" style="color:#A32D2D">Zálohy</div>
+          <div class="stat-value" style="color:#A32D2D;font-size:16px" id="hist-month-zalohy">0 Kč</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">K doplacení</div>
+          <div class="stat-value" id="hist-month-kc" style="font-size:16px">0 Kč</div>
+        </div>
+      </div>
+      <div class="section-label">Záznamy</div>
+      <div class="card" id="history-list">
+        <div class="empty-state">Zatím žádné záznamy</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MANAGER SCREEN -->
+<div id="manager-screen" class="screen">
+  <div class="header">
+    <div class="header-logo">
+      <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M10 3L17 9V17H13V13H7V17H3V9L10 3Z" stroke="white" stroke-width="1.5" fill="none" stroke-linejoin="round"/></svg>
+    </div>
+    <div>
+      <div class="header-title" id="manager-header-name">Přehled</div>
+      <div class="header-sub" id="manager-header-sub"></div>
+    </div>
+    <button class="btn-logout" onclick="logout()">Odhlásit</button>
+  </div>
+  <div class="admin-tabs">
+    <div class="admin-tab active" onclick="managerTab('vykaz')">Zadat výkaz</div>
+    <div class="admin-tab" onclick="managerTab('prehled')">Přehled</div>
+    <div class="admin-tab" onclick="managerTab('vykazy')">Výkazy</div>
+    <div class="admin-tab" onclick="managerTab('zakazky')">Zakázky</div>
+    <div class="admin-tab" onclick="managerTab('nastaveni')">⚙</div>
+  </div>
+
+  <!-- ZADAT VÝKAZ -->
+  <div id="mgr-vykaz" class="admin-panel active">
+    <div class="content">
+      <div class="greeting">
+        <div class="greeting-name" id="mgr-greeting-name"></div>
+        <div class="greeting-date" id="mgr-greeting-date"></div>
+      </div>
+      <div>
+        <div class="section-label">Nový výkaz</div>
+        <div class="card">
+          <div class="form-group">
+            <div class="form-label">Zakázka</div>
+            <select class="form-select" id="mgr-zakaz">
+              <option value="">Vyber zakázku...</option>
+              <option value="2026-001">2026-001 — RD Hostěrádky-Rešov II. etapa</option>
+              <option value="2026-002">2026-002 — Byt Pekárenský dvůr</option>
+              <option value="2026-003">2026-003 — Byt Údolní</option>
+              <option value="2026-004">2026-004 — Byt Jaselská</option>
+              <option value="2026-005">2026-005 — DEK Depo</option>
+              <option value="2026-006">2026-006 — Fitness Třebíč</option>
+              <option value="2026-007">2026-007 — BD Boční Veverská Bítýška</option>
+              <option value="2026-008">2026-008 — RD Velešovice 124</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Datum</div>
+            <input type="date" class="form-select" id="mgr-datum" style="font-size:15px;font-weight:500;">
+          </div>
+          <div class="form-group">
+            <div class="form-label">Počet hodin</div>
+            <div class="stepper">
+              <button class="stepper-btn" onclick="stepMgrHours(-0.5)">−</button>
+              <span class="stepper-val" id="mgr-hours-display">8</span>
+              <span class="stepper-unit">h</span>
+              <button class="stepper-btn" onclick="stepMgrHours(0.5)">+</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Najeté km (volitelné)</div>
+            <div class="stepper">
+              <button class="stepper-btn" onclick="stepMgrKm(-1)">−</button>
+              <span class="stepper-val" id="mgr-km-display">0</span>
+              <span class="stepper-unit">km</span>
+              <button class="stepper-btn" onclick="stepMgrKm(1)">+</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Poznámka (volitelné)</div>
+            <textarea class="form-textarea" id="mgr-note" placeholder="Co bylo hotové, popis práce..."></textarea>
+          </div>
+        </div>
+      </div>
+      <button class="btn-submit" onclick="submitMgrVykaz()">Odeslat výkaz</button>
+
+      <div style="margin-top:0.5rem">
+        <div class="section-label">Záloha</div>
+        <div class="card">
+          <div class="form-group">
+            <div class="form-label">Datum zálohy</div>
+            <input type="date" class="form-select" id="mgr-zaloha-datum" style="font-size:15px;font-weight:500;">
+          </div>
+          <div class="form-group">
+            <div class="form-label">Částka (Kč)</div>
+            <div class="stepper">
+              <button class="stepper-btn" onclick="stepMgrZaloha(-500)">−</button>
+              <span class="stepper-val" id="mgr-zaloha-display" style="font-size:24px">1000</span>
+              <span class="stepper-unit">Kč</span>
+              <button class="stepper-btn" onclick="stepMgrZaloha(500)">+</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn-submit" style="background:var(--danger);margin-top:10px" onclick="submitMgrZaloha()">Zaznamenat zálohu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PŘEHLED -->
+  <div id="mgr-prehled" class="admin-panel">
+    <div class="content">
+      <div class="stat-row" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="stat-card">
+          <div class="stat-label">Tento měsíc</div>
+          <div class="stat-value" id="mgr-month-hrs">0 <span class="stat-unit">h</span></div>
+        </div>
+        <div class="stat-card" style="background:#FCEBEB;border-color:#F09595">
+          <div class="stat-label" style="color:#A32D2D">Zálohy</div>
+          <div class="stat-value" id="mgr-month-zalohy" style="font-size:16px;color:#A32D2D">0 Kč</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Mzdové náklady</div>
+          <div class="stat-value" id="mgr-month-kc" style="font-size:16px">0 Kč</div>
+        </div>
+      </div>
+      <div class="section-label">Pracovníci tento měsíc</div>
+      <div class="card" id="mgr-workers-list"><div class="empty-state">Žádné záznamy</div></div>
+      <div class="section-label">Poslední záznamy</div>
+      <div class="card" id="mgr-recent-list"><div class="empty-state">Žádné záznamy</div></div>
+    </div>
+  </div>
+
+  <!-- VÝKAZY -->
+  <div id="mgr-vykazy" class="admin-panel">
+    <div class="content">
+      <div class="filter-row" id="mgr-worker-filters"></div>
+      <div class="card" id="mgr-all-logs"><div class="empty-state">Žádné záznamy</div></div>
+    </div>
+  </div>
+
+  <!-- ZAKÁZKY -->
+  <div id="mgr-zakazky" class="admin-panel">
+    <div class="content" id="mgr-zakazky-list"><div class="empty-state">Žádné záznamy</div></div>
+  </div>
+
+  <!-- NASTAVENÍ -->
+  <div id="mgr-nastaveni" class="admin-panel">
+    <div class="content">
+      <div class="section-label">Propojení s Google Sheets</div>
+      <div class="card">
+        <div class="form-group">
+          <div class="form-label">Apps Script URL</div>
+          <input type="url" class="form-input" id="script-url-input" placeholder="https://script.google.com/macros/s/..." style="font-size:13px;">
+        </div>
+      </div>
+      <button class="btn-submit" onclick="saveScriptUrl()">Uložit URL</button>
+      <div id="url-status" style="text-align:center;font-size:13px;color:var(--muted);margin-top:8px;min-height:18px;"></div>
+      <div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;">
+        <div class="section-label" style="margin-bottom:12px;">Jak získat URL</div>
+        <div style="font-size:13px;line-height:1.9;color:var(--muted)">
+          1. Jdi na <strong style="color:var(--text)">script.google.com</strong><br>
+          2. Nový projekt → vlož obsah souboru <strong style="color:var(--text)">apps_script.gs</strong><br>
+          3. Nahraď <strong style="color:var(--text)">REPLACE_WITH_YOUR_SHEET_ID</strong> ID tvého Google Sheetu<br>
+          4. Klikni <strong style="color:var(--text)">Nasadit → Nové nasazení</strong><br>
+          5. Typ: Webová aplikace · Přístup: Kdokoli<br>
+          6. Zkopíruj URL a vlož ji sem nahoru
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SUCCESS SCREEN -->
+<div id="success-screen" class="screen">
+  <div class="success-wrap">
+    <div class="success-icon">✓</div>
+    <div class="success-title">Výkaz odeslán</div>
+    <div class="success-sub" id="success-detail"></div>
+    <button class="btn-secondary" onclick="newVykaz()">Zadat další výkaz</button>
+    <button class="btn-secondary" onclick="goToHistory()">Zobrazit moje záznamy</button>
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL = localStorage.getItem('script_url') || 'https://script.google.com/macros/s/AKfycbyKa5mQrdYPBI34pcKwS9Wug6r9ZfPL83DL9nkTz2gU-yWvs5E6hUnQ1VzXvOcox18idg/exec';
+
+const WORKERS = {
+  '8968': { name: 'Marek Jůva', vocative: 'Marku', sazba: 400, role: 'manager' },
+  '4721': { name: 'Pepa Koblížek', vocative: 'Pepo', sazba: 400, role: 'manager' },
+  '1234': { name: 'Petr Němeček', vocative: 'Petře', sazba: 250, role: 'worker' },
+  '3356': { name: 'Franz Alexander Bundschuh', vocative: 'Franzi', sazba: 200, role: 'worker' },
+  '6193': { name: 'Stanislav Telychko', vocative: 'Stanislave', sazba: 250, role: 'worker' }
+};
+const ADMIN_PIN = null;
+const ZAKAZKY = {
+  '2026-001': 'RD Hostěrádky-Rešov II. etapa',
+  '2026-002': 'Byt Pekárenský dvůr',
+  '2026-003': 'Byt Údolní',
+  '2026-004': 'Byt Jaselská',
+  '2026-005': 'DEK Depo',
+  '2026-006': 'Fitness Třebíč',
+  '2026-007': 'BD Boční Veverská Bítýška',
+  '2026-008': 'RD Velešovice 124'
+};
+
+let pinBuffer = '';
+let currentUser = null;
+let currentRole = null;
+let hours = 8;
+let activeWorkerFilter = 'all';
+
+function setToday() {
+  const d = new Date();
+  const s = d.toISOString().split('T')[0];
+  document.getElementById('w-datum').value = s;
+  document.getElementById('greeting-date').textContent = d.toLocaleDateString('cs-CZ', {weekday:'long', day:'numeric', month:'long'});
+}
+
+function pinPress(d) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += d;
+  updateDots();
+  if (pinBuffer.length === 4) setTimeout(checkPin, 150);
+}
+
+function pinDel() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  updateDots();
+  document.getElementById('pin-error').textContent = '';
+  document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('error'));
+}
+
+function updateDots() {
+  const dots = document.querySelectorAll('.pin-dot');
+  dots.forEach((d, i) => {
+    d.classList.toggle('filled', i < pinBuffer.length);
+    d.classList.remove('error');
+  });
+}
+
+function checkPin() {
+  const worker = WORKERS[pinBuffer];
+  if (worker) {
+    currentUser = worker;
+    currentRole = worker.role;
+    if (worker.role === 'manager') {
+      showScreen('manager-screen');
+      loadManagerData();
+      updateManagerFilterChips();
+    } else {
+      document.getElementById('worker-header-name').textContent = worker.name;
+      document.getElementById('worker-header-sub').textContent = worker.sazba + ' Kč/h';
+      document.getElementById('greeting-name').textContent = 'Dobrý den, ' + worker.vocative + '.';
+      setToday();
+      document.getElementById('w-zaloha-datum').value = new Date().toISOString().split('T')[0];
+      showScreen('worker-screen');
+      loadWorkerHistory();
+    }
+    return;
+  }
+  // wrong pin
+  document.querySelectorAll('.pin-dot').forEach(d => { d.classList.add('error'); d.classList.remove('filled'); });
+  document.getElementById('pin-error').textContent = 'Nesprávný PIN, zkus znovu';
+  setTimeout(() => {
+    pinBuffer = '';
+    updateDots();
+    document.getElementById('pin-error').textContent = '';
+  }, 1200);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function logout() {
+  currentUser = null; currentRole = null; pinBuffer = '';
+  updateDots();
+  showScreen('pin-screen');
+}
+
+function stepHours(delta) {
+  hours = Math.max(0.5, Math.min(12, hours + delta));
+  document.getElementById('w-hours-display').textContent = hours % 1 === 0 ? hours : hours.toFixed(1);
+}
+
+function workerTab(tab) {
+  document.querySelectorAll('#worker-screen .admin-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='log')||(i===1&&tab==='history')));
+  document.getElementById('worker-log').classList.toggle('active', tab==='log');
+  document.getElementById('worker-history').classList.toggle('active', tab==='history');
+  if (tab==='history') loadWorkerHistory();
+  if (document.getElementById('success-screen').classList.contains('active')) showScreen('worker-screen');
+}
+
+function adminTab(tab) {
+  const tabs = ['prehled','vykazy','zakazky'];
+  document.querySelectorAll('#admin-screen .admin-tab').forEach((t,i) => t.classList.toggle('active', tabs[i]===tab));
+  tabs.forEach(t => { document.getElementById('admin-'+t).classList.toggle('active', t===tab); });
+  if (tab==='vykazy') renderAdminLogs();
+  if (tab==='zakazky') renderAdminZakazky();
+}
+
+function getData() {
+  return JSON.parse(localStorage.getItem('vykazy') || '[]');
+}
+function saveData(data) {
+  localStorage.setItem('vykazy', JSON.stringify(data));
+}
+
+async function submitVykaz() {
+  const zakaz = document.getElementById('w-zakaz').value;
+  const datum = document.getElementById('w-datum').value;
+  const note = document.getElementById('w-note').value;
+  if (!zakaz) { alert('Vyber prosím zakázku'); return; }
+  if (!datum) { alert('Vyber prosím datum'); return; }
+
+  const record = {
+    id: Date.now(),
+    worker: currentUser.name,
+    sazba: currentUser.sazba,
+    zakaz_id: zakaz,
+    zakaz_name: ZAKAZKY[zakaz],
+    datum: datum,
+    hours: hours,
+    km: km,
+    note: note,
+    cost: hours * currentUser.sazba,
+    ts: new Date().toISOString()
+  };
+
+  // Save locally
+  const data = getData();
+  data.unshift(record);
+  saveData(data);
+
+  // Try to send to Google Sheets (if configured)
+  const scriptUrl = localStorage.getItem('script_url') || '';
+  if (scriptUrl !== '') {
+    try {
+      await fetch(scriptUrl, { method:'POST', body: JSON.stringify(record) });
+    } catch(e) {}
+  }
+
+  document.getElementById('success-detail').innerHTML =
+    `<strong>${record.zakaz_name}</strong><br>${record.datum} · ${hours} h${km > 0 ? ' · ' + km + ' km' : ''} · ${record.cost.toLocaleString('cs-CZ')} Kč`;
+  showScreen('success-screen');
+  document.getElementById('w-zakaz').value = '';
+  document.getElementById('w-note').value = '';
+  hours = 8;
+  km = 0;
+  document.getElementById('w-hours-display').textContent = '8';
+  document.getElementById('w-km-display').textContent = '0';
+}
+
+function newVykaz() {
+  showScreen('worker-screen');
+  workerTab('log');
+}
+
+let km = 0;
+let mgrKm = 0;
+
+function stepKm(delta) {
+  km = Math.max(0, km + delta);
+  document.getElementById('w-km-display').textContent = km;
+}
+
+function stepMgrKm(delta) {
+  mgrKm = Math.max(0, mgrKm + delta);
+  document.getElementById('mgr-km-display').textContent = mgrKm;
+}
+
+let zalohaAmount = 1000;
+
+function stepZaloha(delta) {
+  zalohaAmount = Math.max(500, zalohaAmount + delta);
+  document.getElementById('w-zaloha-display').textContent = zalohaAmount.toLocaleString('cs-CZ');
+}
+
+async function submitZaloha() {
+  const datum = document.getElementById('w-zaloha-datum').value;
+  if (!datum) { alert('Vyber prosím datum zálohy'); return; }
+
+  const record = {
+    id: Date.now(),
+    type: 'zaloha',
+    worker: currentUser.name,
+    sazba: currentUser.sazba,
+    datum: datum,
+    zaloha: zalohaAmount,
+    ts: new Date().toISOString()
+  };
+
+  const data = getData();
+  data.unshift(record);
+  saveData(data);
+
+  const scriptUrl = localStorage.getItem('script_url') || SCRIPT_URL;
+  if (scriptUrl) {
+    try { await fetch(scriptUrl, { method:'POST', body: JSON.stringify(record) }); } catch(e) {}
+  }
+
+  document.getElementById('success-detail').innerHTML =
+    `Záloha <strong>${zalohaAmount.toLocaleString('cs-CZ')} Kč</strong> zaznamenána<br>${datum}`;
+  showScreen('success-screen');
+  zalohaAmount = 1000;
+  document.getElementById('w-zaloha-display').textContent = '1 000';
+}
+function loadWorkerHistory() {
+  const all = getData().filter(r => r.worker === currentUser.name);
+  const now = new Date();
+  const ym = now.getFullYear()+'-'+(now.getMonth()+1).toString().padStart(2,'0');
+  const monthData = all.filter(r => r.datum.startsWith(ym));
+
+  const monthHrs = monthData.filter(r=>r.type!=='zaloha').reduce((s,r) => s+r.hours, 0);
+  const monthKcBrutto = monthData.filter(r=>r.type!=='zaloha').reduce((s,r) => s+r.cost, 0);
+  const monthZalohy = monthData.filter(r=>r.type==='zaloha').reduce((s,r) => s+(r.zaloha||0), 0);
+  const monthKm = monthData.filter(r=>r.type!=='zaloha').reduce((s,r) => s+(r.km||0), 0);
+  const kDoplaceni = Math.max(0, monthKcBrutto - monthZalohy);
+
+  document.getElementById('hist-month-hrs').innerHTML = monthHrs + ' <span class="stat-unit">h</span>';
+  document.getElementById('hist-month-km').innerHTML = monthKm + ' <span class="stat-unit">km</span>';
+  document.getElementById('hist-month-zalohy').textContent = monthZalohy.toLocaleString('cs-CZ') + ' Kč';
+  document.getElementById('hist-month-kc').textContent = kDoplaceni.toLocaleString('cs-CZ') + ' Kč';
+
+  const el = document.getElementById('history-list');
+  if (!all.length) { el.innerHTML = '<div class="empty-state">Zatím žádné záznamy</div>'; return; }
+  el.innerHTML = all.slice(0,30).map(r => {
+    if (r.type === 'zaloha') return `
+      <div class="history-item">
+        <div class="history-date">${r.datum.slice(5).replace('-','.')}</div>
+        <div class="history-info"><div class="history-zakaz" style="color:#A32D2D">Záloha</div></div>
+        <div class="history-hrs" style="color:#A32D2D">−${(r.zaloha||0).toLocaleString('cs-CZ')} Kč</div>
+      </div>`;
+    return `
+      <div class="history-item">
+        <div class="history-date">${r.datum.slice(5).replace('-','.')}</div>
+        <div class="history-info">
+          <div class="history-zakaz">${r.zakaz_id} — ${r.zakaz_name}</div>
+          <div class="history-note">${r.hours}h${r.km > 0 ? ' · ' + r.km + ' km' : ''}${r.note ? ' · ' + r.note : ''}</div>
+        </div>
+        <div class="history-hrs">${r.cost.toLocaleString('cs-CZ')} Kč</div>
+      </div>`;
+  }).join('');
+}
+
+let mgrZalohaAmount = 1000;
+
+function stepMgrZaloha(delta) {
+  mgrZalohaAmount = Math.max(500, mgrZalohaAmount + delta);
+  document.getElementById('mgr-zaloha-display').textContent = mgrZalohaAmount.toLocaleString('cs-CZ');
+}
+
+async function submitMgrZaloha() {
+  const datum = document.getElementById('mgr-zaloha-datum').value;
+  if (!datum) { alert('Vyber prosím datum zálohy'); return; }
+
+  const record = {
+    id: Date.now(),
+    type: 'zaloha',
+    worker: currentUser.name,
+    sazba: currentUser.sazba,
+    datum: datum,
+    zaloha: mgrZalohaAmount,
+    ts: new Date().toISOString()
+  };
+
+  const data = getData();
+  data.unshift(record);
+  saveData(data);
+
+  const scriptUrl = localStorage.getItem('script_url') || SCRIPT_URL;
+  if (scriptUrl) {
+    try { await fetch(scriptUrl, { method:'POST', body: JSON.stringify(record) }); } catch(e) {}
+  }
+
+  document.getElementById('success-detail').innerHTML =
+    `Záloha <strong>${mgrZalohaAmount.toLocaleString('cs-CZ')} Kč</strong> zaznamenána<br>${datum}`;
+  showScreen('success-screen');
+  mgrZalohaAmount = 1000;
+  document.getElementById('mgr-zaloha-display').textContent = '1 000';
+}
+
+let mgrHours = 8;
+let mgrWorkerFilter = 'all';
+
+function managerTab(tab) {
+  const tabs = ['vykaz','prehled','vykazy','zakazky','nastaveni'];
+  document.querySelectorAll('#manager-screen .admin-tab').forEach((t,i) => t.classList.toggle('active', tabs[i]===tab));
+  tabs.forEach(t => document.getElementById('mgr-'+t).classList.toggle('active', t===tab));
+  if (tab==='prehled') loadManagerData();
+  if (tab==='vykazy') renderMgrLogs();
+  if (tab==='zakazky') renderMgrZakazky();
+  if (tab==='nastaveni') {
+    const saved = localStorage.getItem('script_url') || '';
+    document.getElementById('script-url-input').value = saved;
+    document.getElementById('url-status').textContent = saved ? '✓ URL je uložena' : '';
+  }
+}
+
+function saveScriptUrl() {
+  const url = document.getElementById('script-url-input').value.trim();
+  if (!url || !url.startsWith('https://script.google.com')) {
+    document.getElementById('url-status').textContent = 'Zadej platnou Apps Script URL';
+    return;
+  }
+  localStorage.setItem('script_url', url);
+  document.getElementById('url-status').textContent = '✓ Uloženo';
+}
+
+function stepMgrHours(delta) {
+  mgrHours = Math.max(0.5, Math.min(12, mgrHours + delta));
+  document.getElementById('mgr-hours-display').textContent = mgrHours % 1 === 0 ? mgrHours : mgrHours.toFixed(1);
+}
+
+function updateManagerFilterChips() {
+  const allWorkers = Object.values(WORKERS);
+  const el = document.getElementById('mgr-worker-filters');
+  el.innerHTML = `<div class="filter-chip active" onclick="mgrFilterWorker('all',this)">Všichni</div>` +
+    allWorkers.map(w => `<div class="filter-chip" onclick="mgrFilterWorker('${w.name}',this)">${w.name.split(' ')[0]} ${w.name.split(' ')[1][0]}.</div>`).join('');
+}
+
+function mgrFilterWorker(name, el) {
+  mgrWorkerFilter = name;
+  document.querySelectorAll('#mgr-worker-filters .filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderMgrLogs();
+}
+
+async function submitMgrVykaz() {
+  const zakaz = document.getElementById('mgr-zakaz').value;
+  const datum = document.getElementById('mgr-datum').value;
+  const note = document.getElementById('mgr-note').value;
+  if (!zakaz) { alert('Vyber prosím zakázku'); return; }
+  if (!datum) { alert('Vyber prosím datum'); return; }
+
+  const record = {
+    id: Date.now(),
+    worker: currentUser.name,
+    sazba: currentUser.sazba,
+    zakaz_id: zakaz,
+    zakaz_name: ZAKAZKY[zakaz],
+    datum: datum,
+    hours: mgrHours,
+    km: mgrKm,
+    note: note,
+    cost: mgrHours * currentUser.sazba,
+    ts: new Date().toISOString()
+  };
+
+  const data = getData();
+  data.unshift(record);
+  saveData(data);
+
+  if (SCRIPT_URL !== '') {
+    try { await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify(record) }); } catch(e) {}
+  }
+
+  document.getElementById('success-detail').innerHTML =
+    `<strong>${record.zakaz_name}</strong><br>${record.datum} · ${mgrHours} h${mgrKm > 0 ? ' · ' + mgrKm + ' km' : ''} · ${record.cost.toLocaleString('cs-CZ')} Kč`;
+  showScreen('success-screen');
+  document.getElementById('mgr-zakaz').value = '';
+  document.getElementById('mgr-note').value = '';
+  mgrHours = 8;
+  mgrKm = 0;
+  document.getElementById('mgr-hours-display').textContent = '8';
+  document.getElementById('mgr-km-display').textContent = '0';
+}
+
+function goToHistory() {
+  if (currentRole === 'manager') {
+    showScreen('manager-screen');
+    managerTab('prehled');
+  } else {
+    showScreen('worker-screen');
+    workerTab('history');
+  }
+}
+
+function newVykaz() {
+  if (currentRole === 'manager') {
+    showScreen('manager-screen');
+    managerTab('vykaz');
+  } else {
+    showScreen('worker-screen');
+    workerTab('log');
+  }
+}
+
+function loadManagerData() {
+  const data = getData();
+  const now = new Date();
+  const ym = now.getFullYear()+'-'+(now.getMonth()+1).toString().padStart(2,'0');
+  document.getElementById('manager-header-name').textContent = currentUser.name;
+  document.getElementById('manager-header-sub').textContent = now.toLocaleDateString('cs-CZ',{month:'long',year:'numeric'});
+  document.getElementById('mgr-greeting-name').textContent = 'Dobrý den, ' + currentUser.vocative + '.';
+  document.getElementById('mgr-greeting-date').textContent = new Date().toLocaleDateString('cs-CZ',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('mgr-datum').value = new Date().toISOString().split('T')[0];
+  document.getElementById('mgr-zaloha-datum').value = new Date().toISOString().split('T')[0];
+
+  const monthData = data.filter(r => r.datum.startsWith(ym));
+  const totalHrs = monthData.filter(r=>r.type!=='zaloha').reduce((s,r)=>s+(r.hours||0),0);
+  const totalKc = monthData.filter(r=>r.type!=='zaloha').reduce((s,r)=>s+(r.cost||0),0);
+  const totalZalohy = monthData.filter(r=>r.type==='zaloha').reduce((s,r)=>s+(r.zaloha||0),0);
+  document.getElementById('mgr-month-hrs').innerHTML = totalHrs + ' <span class="stat-unit">h</span>';
+  document.getElementById('mgr-month-kc').textContent = totalKc.toLocaleString('cs-CZ')+' Kč';
+  document.getElementById('mgr-month-zalohy').textContent = totalZalohy.toLocaleString('cs-CZ')+' Kč';
+
+  const byWorker = {};
+  Object.values(WORKERS).forEach(w => {
+    byWorker[w.name] = { hrs: 0, kc: 0, zalohy: 0, km: 0, sazba: w.sazba };
+  });
+  monthData.forEach(r => {
+    if (!byWorker[r.worker]) byWorker[r.worker] = { hrs: 0, kc: 0, zalohy: 0, km: 0, sazba: r.sazba };
+    if (r.type === 'zaloha') {
+      byWorker[r.worker].zalohy += (r.zaloha || 0);
+    } else {
+      byWorker[r.worker].hrs += (r.hours || 0);
+      byWorker[r.worker].kc += (r.cost || 0);
+      byWorker[r.worker].km += (r.km || 0);
+    }
+  });
+  const wEl = document.getElementById('mgr-workers-list');
+  const workers = Object.entries(byWorker);
+  wEl.innerHTML = workers.map(([name, d]) => {
+    const kDoplaceni = Math.max(0, d.kc - d.zalohy);
+    return `
+    <div style="padding:12px 16px;border-bottom:0.5px solid var(--border)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div>
+          <div style="font-size:14px;font-weight:500">${name}</div>
+          <div style="font-size:12px;color:var(--muted)">${d.sazba} Kč/h · ${d.hrs} h${d.km > 0 ? ' · ' + d.km + ' km' : ''}</div>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:500">${d.kc.toLocaleString('cs-CZ')} Kč</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div style="background:#FCEBEB;border-radius:6px;padding:6px 10px">
+          <div style="font-size:10px;color:#A32D2D;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Zálohy</div>
+          <div style="font-size:13px;font-weight:500;color:#A32D2D">${d.zalohy > 0 ? '−' + d.zalohy.toLocaleString('cs-CZ') + ' Kč' : '—'}</div>
+        </div>
+        <div style="background:var(--accent-light);border-radius:6px;padding:6px 10px">
+          <div style="font-size:10px;color:var(--accent-text);font-weight:600;text-transform:uppercase;letter-spacing:.5px">K doplacení</div>
+          <div style="font-size:13px;font-weight:500;color:var(--accent-text)">${kDoplaceni.toLocaleString('cs-CZ')} Kč</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const rEl = document.getElementById('mgr-recent-list');
+  if (!data.length) { rEl.innerHTML='<div class="empty-state">Žádné záznamy</div>'; return; }
+  rEl.innerHTML = data.slice(0,8).map(r=>`
+    <div class="log-row">
+      <div><div class="log-worker">${r.worker}</div><div class="log-detail">${r.datum} · ${r.zakaz_id}</div></div>
+      <div class="log-right"><div class="log-hrs">${r.hours}h</div><div class="log-cost">${r.cost.toLocaleString('cs-CZ')} Kč</div></div>
+    </div>`).join('');
+}
+
+function renderMgrLogs() {
+  let data = getData();
+  if (mgrWorkerFilter !== 'all') data = data.filter(r=>r.worker===mgrWorkerFilter);
+  const el = document.getElementById('mgr-all-logs');
+  if (!data.length) { el.innerHTML='<div class="empty-state">Žádné záznamy</div>'; return; }
+  el.innerHTML = data.map(r=>`
+    <div class="log-row">
+      <div><div class="log-worker">${r.worker}</div><div class="log-detail">${r.datum} · ${r.zakaz_id} — ${r.zakaz_name}${r.km > 0 ? ' · ' + r.km + ' km' : ''}${r.note?'<br>'+r.note:''}</div></div>
+      <div class="log-right"><div class="log-hrs">${r.hours}h</div><div class="log-cost">${r.cost.toLocaleString('cs-CZ')} Kč</div></div>
+    </div>`).join('');
+}
+
+function renderMgrZakazky() {
+  const data = getData();
+  const el = document.getElementById('mgr-zakazky-list');
+  const byZakaz = {};
+  Object.entries(ZAKAZKY).forEach(([id,name])=>byZakaz[id]={name,hrs:0,kc:0,workers:new Set()});
+  data.forEach(r=>{ if(byZakaz[r.zakaz_id]){ byZakaz[r.zakaz_id].hrs+=r.hours; byZakaz[r.zakaz_id].kc+=r.cost; byZakaz[r.zakaz_id].workers.add(r.worker); } });
+  el.innerHTML = Object.entries(byZakaz).map(([id,z])=>`
+    <div class="zakaz-card">
+      <div class="zakaz-header"><div class="zakaz-name">${z.name}</div><div class="zakaz-id">${id}</div></div>
+      <div class="zakaz-stats">
+        <div class="zakaz-stat"><div class="v">${z.hrs}</div><div class="l">hodin</div></div>
+        <div class="zakaz-stat"><div class="v">${z.kc>0?Math.round(z.kc/1000)+'k':'—'}</div><div class="l">Kč</div></div>
+        <div class="zakaz-stat"><div class="v">${z.workers.size}</div><div class="l">pracovníků</div></div>
+      </div>
+    </div>`).join('');
+}
+
+// Init
+setToday();
+</script>
+</body>
+</html>
