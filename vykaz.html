@@ -604,14 +604,6 @@ function workerTab(tab) {
   if (document.getElementById('success-screen').classList.contains('active')) showScreen('worker-screen');
 }
 
-function adminTab(tab) {
-  const tabs = ['prehled','vykazy','zakazky'];
-  document.querySelectorAll('#admin-screen .admin-tab').forEach((t,i) => t.classList.toggle('active', tabs[i]===tab));
-  tabs.forEach(t => { document.getElementById('admin-'+t).classList.toggle('active', t===tab); });
-  if (tab==='vykazy') renderAdminLogs();
-  if (tab==='zakazky') renderAdminZakazky();
-}
-
 function getData() {
   return JSON.parse(localStorage.getItem('vykazy') || '[]');
 }
@@ -665,8 +657,13 @@ async function submitVykaz() {
 }
 
 function newVykaz() {
-  showScreen('worker-screen');
-  workerTab('log');
+  if (currentRole === 'manager') {
+    showScreen('manager-screen');
+    managerTab('vykaz');
+  } else {
+    showScreen('worker-screen');
+    workerTab('log');
+  }
 }
 
 let km = 0;
@@ -864,8 +861,9 @@ async function submitMgrVykaz() {
   data.unshift(record);
   saveData(data);
 
-  if (SCRIPT_URL !== '') {
-    try { await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify(record) }); } catch(e) {}
+  const scriptUrl = localStorage.getItem('script_url') || SCRIPT_URL;
+  if (scriptUrl) {
+    try { await fetch(scriptUrl, { method:'POST', body: JSON.stringify(record) }); } catch(e) {}
   }
 
   document.getElementById('success-detail').innerHTML =
@@ -886,16 +884,6 @@ function goToHistory() {
   } else {
     showScreen('worker-screen');
     workerTab('history');
-  }
-}
-
-function newVykaz() {
-  if (currentRole === 'manager') {
-    showScreen('manager-screen');
-    managerTab('vykaz');
-  } else {
-    showScreen('worker-screen');
-    workerTab('log');
   }
 }
 
@@ -960,11 +948,26 @@ function loadManagerData() {
 
   const rEl = document.getElementById('mgr-recent-list');
   if (!data.length) { rEl.innerHTML='<div class="empty-state">Žádné záznamy</div>'; return; }
-  rEl.innerHTML = data.slice(0,8).map(r=>`
-    <div class="log-row">
-      <div><div class="log-worker">${r.worker}</div><div class="log-detail">${r.datum} · ${r.zakaz_id}</div></div>
-      <div class="log-right"><div class="log-hrs">${r.hours}h</div><div class="log-cost">${r.cost.toLocaleString('cs-CZ')} Kč</div></div>
-    </div>`).join('');
+  rEl.innerHTML = data.slice(0,8).map(r => {
+    if (r.type === 'zaloha') return `
+      <div class="log-row" style="background:#FFF5F5">
+        <div><div class="log-worker" style="color:#A32D2D">${r.worker}</div><div class="log-detail">${r.datum} · Záloha</div></div>
+        <div class="log-right"><div class="log-hrs" style="color:#A32D2D">−${(r.zaloha||0).toLocaleString('cs-CZ')} Kč</div></div>
+      </div>`;
+    return `
+      <div class="log-row">
+        <div><div class="log-worker">${r.worker}</div><div class="log-detail">${r.datum} · ${r.zakaz_id||''}</div></div>
+        <div class="log-right"><div class="log-hrs">${r.hours||0}h</div><div class="log-cost">${(r.cost||0).toLocaleString('cs-CZ')} Kč</div></div>
+      </div>`;
+  }).join('');
+}
+
+function deleteRecord(id) {
+  if (!confirm('Smazat tento záznam?')) return;
+  const data = getData().filter(r => r.id !== id);
+  saveData(data);
+  renderMgrLogs();
+  loadManagerData();
 }
 
 function renderMgrLogs() {
@@ -972,25 +975,38 @@ function renderMgrLogs() {
   if (mgrWorkerFilter !== 'all') data = data.filter(r=>r.worker===mgrWorkerFilter);
   const el = document.getElementById('mgr-all-logs');
   if (!data.length) { el.innerHTML='<div class="empty-state">Žádné záznamy</div>'; return; }
-  el.innerHTML = data.map(r=>`
-    <div class="log-row">
-      <div><div class="log-worker">${r.worker}</div><div class="log-detail">${r.datum} · ${r.zakaz_id} — ${r.zakaz_name}${r.km > 0 ? ' · ' + r.km + ' km' : ''}${r.note?'<br>'+r.note:''}</div></div>
-      <div class="log-right"><div class="log-hrs">${r.hours}h</div><div class="log-cost">${r.cost.toLocaleString('cs-CZ')} Kč</div></div>
-    </div>`).join('');
+  el.innerHTML = data.map(r => {
+    if (r.type === 'zaloha') return `
+      <div class="log-row" style="background:#FFF5F5">
+        <div><div class="log-worker" style="color:#A32D2D">${r.worker}</div><div class="log-detail">${r.datum} · Záloha</div></div>
+        <div class="log-right" style="display:flex;align-items:center;gap:10px">
+          <div><div class="log-hrs" style="color:#A32D2D">−${(r.zaloha||0).toLocaleString('cs-CZ')} Kč</div></div>
+          <button onclick="deleteRecord(${r.id})" style="background:none;border:none;color:#ccc;font-size:16px;cursor:pointer;padding:4px;line-height:1" title="Smazat">✕</button>
+        </div>
+      </div>`;
+    return `
+      <div class="log-row">
+        <div><div class="log-worker">${r.worker}</div><div class="log-detail">${r.datum} · ${r.zakaz_id} — ${r.zakaz_name}${r.km > 0 ? ' · ' + r.km + ' km' : ''}${r.note?'<br>'+r.note:''}</div></div>
+        <div class="log-right" style="display:flex;align-items:center;gap:10px">
+          <div><div class="log-hrs">${r.hours}h</div><div class="log-cost">${(r.cost||0).toLocaleString('cs-CZ')} Kč</div></div>
+          <button onclick="deleteRecord(${r.id})" style="background:none;border:none;color:#ccc;font-size:16px;cursor:pointer;padding:4px;line-height:1" title="Smazat">✕</button>
+        </div>
+      </div>`;
+  }).join('');
 }
 
 function renderMgrZakazky() {
-  const data = getData();
+  const data = getData().filter(r => r.type !== 'zaloha');
   const el = document.getElementById('mgr-zakazky-list');
   const byZakaz = {};
-  Object.entries(ZAKAZKY).forEach(([id,name])=>byZakaz[id]={name,hrs:0,kc:0,workers:new Set()});
-  data.forEach(r=>{ if(byZakaz[r.zakaz_id]){ byZakaz[r.zakaz_id].hrs+=r.hours; byZakaz[r.zakaz_id].kc+=r.cost; byZakaz[r.zakaz_id].workers.add(r.worker); } });
+  Object.entries(ZAKAZKY).forEach(([id,name])=>byZakaz[id]={name,hrs:0,kc:0,km:0,workers:new Set()});
+  data.forEach(r=>{ if(byZakaz[r.zakaz_id]){ byZakaz[r.zakaz_id].hrs+=(r.hours||0); byZakaz[r.zakaz_id].kc+=(r.cost||0); byZakaz[r.zakaz_id].km+=(r.km||0); byZakaz[r.zakaz_id].workers.add(r.worker); } });
   el.innerHTML = Object.entries(byZakaz).map(([id,z])=>`
     <div class="zakaz-card">
       <div class="zakaz-header"><div class="zakaz-name">${z.name}</div><div class="zakaz-id">${id}</div></div>
       <div class="zakaz-stats">
         <div class="zakaz-stat"><div class="v">${z.hrs}</div><div class="l">hodin</div></div>
-        <div class="zakaz-stat"><div class="v">${z.kc>0?Math.round(z.kc/1000)+'k':'—'}</div><div class="l">Kč</div></div>
+        <div class="zakaz-stat"><div class="v">${z.km > 0 ? z.km + ' km' : z.kc>0?Math.round(z.kc/1000)+'k Kč':'—'}</div><div class="l">${z.km > 0 ? 'km' : 'Kč'}</div></div>
         <div class="zakaz-stat"><div class="v">${z.workers.size}</div><div class="l">pracovníků</div></div>
       </div>
     </div>`).join('');
