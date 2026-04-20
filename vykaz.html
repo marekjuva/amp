@@ -494,7 +494,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 </div>
 
 <script>
-const SCRIPT_URL = localStorage.getItem('script_url') || 'https://script.google.com/macros/s/AKfycbx5QXZVkqkCle2T8bvkaKnEGuA0GE3xR_d98MFZQDJULXDqcmXzhnLFoB56Iy1Et6OAbw/exec';
+const SCRIPT_URL = localStorage.getItem('script_url') || 'https://script.google.com/macros/s/AKfycbxbcM3T8_iQaJ8uGn9fv4W99k3CuJlAKq4p0Nyy5ysQ1CRnJRyCFkme2NzpR3oXQ7A2GA/exec';
 
 const WORKERS = {
   '8968': { name: 'Marek Jůva', vocative: 'Marku', sazba: 400, role: 'manager' },
@@ -557,8 +557,11 @@ function checkPin() {
     currentRole = worker.role;
     if (worker.role === 'manager') {
       showScreen('manager-screen');
-      loadManagerData();
       updateManagerFilterChips();
+      loadManagerData();
+      fetchFromSheet(() => {
+        loadManagerData();
+      });
     } else {
       document.getElementById('worker-header-name').textContent = worker.name;
       document.getElementById('worker-header-sub').textContent = worker.sazba + ' Kč/h';
@@ -566,7 +569,9 @@ function checkPin() {
       setToday();
       document.getElementById('w-zaloha-datum').value = new Date().toISOString().split('T')[0];
       showScreen('worker-screen');
-      loadWorkerHistory();
+      fetchFromSheet(() => {
+        loadWorkerHistory();
+      });
     }
     return;
   }
@@ -600,7 +605,9 @@ function workerTab(tab) {
   document.querySelectorAll('#worker-screen .admin-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='log')||(i===1&&tab==='history')));
   document.getElementById('worker-log').classList.toggle('active', tab==='log');
   document.getElementById('worker-history').classList.toggle('active', tab==='history');
-  if (tab==='history') loadWorkerHistory();
+  if (tab==='history') {
+    fetchFromSheet(() => loadWorkerHistory());
+  }
   if (document.getElementById('success-screen').classList.contains('active')) showScreen('worker-screen');
 }
 
@@ -609,6 +616,37 @@ function getData() {
 }
 function saveData(data) {
   localStorage.setItem('vykazy', JSON.stringify(data));
+}
+
+function fetchFromSheet(callback) {
+  const scriptUrl = localStorage.getItem('script_url') || SCRIPT_URL;
+  if (!scriptUrl) { callback(); return; }
+  const cbName = 'jsonp_cb_' + Date.now();
+  window[cbName] = function(response) {
+    if (response && response.status === 'ok' && Array.isArray(response.data)) {
+      const remote = response.data;
+      remote.sort((a,b) => (b.ts||'').localeCompare(a.ts||''));
+      saveData(remote);
+    }
+    delete window[cbName];
+    document.head.removeChild(script);
+    callback();
+  };
+  const script = document.createElement('script');
+  script.src = scriptUrl + '?action=list&callback=' + cbName;
+  script.onerror = function() {
+    delete window[cbName];
+    document.head.removeChild(script);
+    callback();
+  };
+  document.head.appendChild(script);
+  setTimeout(() => {
+    if (window[cbName]) {
+      delete window[cbName];
+      try { document.head.removeChild(script); } catch(e) {}
+      callback();
+    }
+  }, 10000);
 }
 
 async function submitVykaz() {
@@ -797,9 +835,13 @@ function managerTab(tab) {
   const tabs = ['vykaz','prehled','vykazy','zakazky','nastaveni'];
   document.querySelectorAll('#manager-screen .admin-tab').forEach((t,i) => t.classList.toggle('active', tabs[i]===tab));
   tabs.forEach(t => document.getElementById('mgr-'+t).classList.toggle('active', t===tab));
-  if (tab==='prehled') loadManagerData();
-  if (tab==='vykazy') renderMgrLogs();
-  if (tab==='zakazky') renderMgrZakazky();
+  if (tab==='prehled' || tab==='vykazy' || tab==='zakazky') {
+    fetchFromSheet(() => {
+      if (tab==='prehled') loadManagerData();
+      if (tab==='vykazy') renderMgrLogs();
+      if (tab==='zakazky') renderMgrZakazky();
+    });
+  }
   if (tab==='nastaveni') {
     const saved = localStorage.getItem('script_url') || '';
     document.getElementById('script-url-input').value = saved;
@@ -968,6 +1010,14 @@ function deleteRecord(id) {
   saveData(data);
   renderMgrLogs();
   loadManagerData();
+  const scriptUrl = localStorage.getItem('script_url') || SCRIPT_URL;
+  if (scriptUrl) {
+    const cbName = 'jsonp_del_' + Date.now();
+    window[cbName] = function() { delete window[cbName]; document.head.removeChild(s); };
+    const s = document.createElement('script');
+    s.src = scriptUrl + '?action=delete&id=' + encodeURIComponent(id) + '&callback=' + cbName;
+    document.head.appendChild(s);
+  }
 }
 
 function renderMgrLogs() {
