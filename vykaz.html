@@ -494,7 +494,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 </div>
 
 <script>
-const SCRIPT_URL = localStorage.getItem('script_url') || 'https://script.google.com/macros/s/AKfycbxbcM3T8_iQaJ8uGn9fv4W99k3CuJlAKq4p0Nyy5ysQ1CRnJRyCFkme2NzpR3oXQ7A2GA/exec';
+const SCRIPT_URL = localStorage.getItem('script_url') || 'https://script.google.com/macros/s/AKfycbzNJJvRZVQthgbflMpBb_Tj41T6Q5zKZHuJ39BuxiJBQSY1haKzAo-sFJuTmBPCMd0eEA/exec';
+const TOKEN = 'j_PYSobT0c86bY-DMtCp7hQvJ_AgBki7';
 
 const WORKERS = {
   '8968': { name: 'Marek Jůva', vocative: 'Marku', sazba: 400, role: 'manager' },
@@ -633,7 +634,7 @@ function fetchFromSheet(callback) {
     callback();
   };
   const script = document.createElement('script');
-  script.src = scriptUrl + '?action=list&callback=' + cbName;
+  script.src = scriptUrl + '?action=list&token=' + encodeURIComponent(TOKEN) + '&callback=' + cbName;
   script.onerror = function() {
     delete window[cbName];
     document.head.removeChild(script);
@@ -679,7 +680,7 @@ async function submitVykaz() {
   const scriptUrl = localStorage.getItem('script_url') || '';
   if (scriptUrl !== '') {
     try {
-      await fetch(scriptUrl, { method:'POST', body: JSON.stringify(record) });
+      await fetch(scriptUrl, { method:'POST', body: JSON.stringify({...record, token: TOKEN}) });
     } catch(e) {}
   }
 
@@ -744,7 +745,7 @@ async function submitZaloha() {
 
   const scriptUrl = localStorage.getItem('script_url') || SCRIPT_URL;
   if (scriptUrl) {
-    try { await fetch(scriptUrl, { method:'POST', body: JSON.stringify(record) }); } catch(e) {}
+    try { await fetch(scriptUrl, { method:'POST', body: JSON.stringify({...record, token: TOKEN}) }); } catch(e) {}
   }
 
   document.getElementById('success-detail').innerHTML =
@@ -818,7 +819,7 @@ async function submitMgrZaloha() {
 
   const scriptUrl = localStorage.getItem('script_url') || SCRIPT_URL;
   if (scriptUrl) {
-    try { await fetch(scriptUrl, { method:'POST', body: JSON.stringify(record) }); } catch(e) {}
+    try { await fetch(scriptUrl, { method:'POST', body: JSON.stringify({...record, token: TOKEN}) }); } catch(e) {}
   }
 
   document.getElementById('success-detail').innerHTML =
@@ -905,7 +906,7 @@ async function submitMgrVykaz() {
 
   const scriptUrl = localStorage.getItem('script_url') || SCRIPT_URL;
   if (scriptUrl) {
-    try { await fetch(scriptUrl, { method:'POST', body: JSON.stringify(record) }); } catch(e) {}
+    try { await fetch(scriptUrl, { method:'POST', body: JSON.stringify({...record, token: TOKEN}) }); } catch(e) {}
   }
 
   document.getElementById('success-detail').innerHTML =
@@ -1015,7 +1016,7 @@ function deleteRecord(id) {
     const cbName = 'jsonp_del_' + Date.now();
     window[cbName] = function() { delete window[cbName]; document.head.removeChild(s); };
     const s = document.createElement('script');
-    s.src = scriptUrl + '?action=delete&id=' + encodeURIComponent(id) + '&callback=' + cbName;
+    s.src = scriptUrl + '?action=delete&id=' + encodeURIComponent(id) + '&token=' + encodeURIComponent(TOKEN) + '&callback=' + cbName;
     document.head.appendChild(s);
   }
 }
