@@ -178,6 +178,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <div class="pin-dot"></div>
       <div class="pin-dot"></div>
       <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
     </div>
     <div class="pin-keypad">
       <div class="pin-key" onclick="pinPress('1')">1</div>
@@ -289,12 +291,53 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         </div>
         <button class="btn-submit" style="background:var(--danger);margin-top:10px" onclick="submitZaloha()">Zaznamenat zálohu</button>
       </div>
+
+      <div style="margin-top:0.5rem">
+        <div class="section-label">Úkolová práce</div>
+        <div class="card">
+          <div class="form-group">
+            <div class="form-label">Zakázka</div>
+            <select class="form-select" id="w-ukol-zakaz">
+              <option value="">Vyber zakázku...</option>
+              <option value="2026-001">2026-001 — RD Hostěrádky-Rešov II. etapa</option>
+              <option value="2026-002">2026-002 — Byt Pekárenský dvůr</option>
+              <option value="2026-003">2026-003 — Byt Údolní</option>
+              <option value="2026-004">2026-004 — Byt Jaselská</option>
+              <option value="2026-005">2026-005 — DEK Depo</option>
+              <option value="2026-006">2026-006 — Fitness Třebíč</option>
+              <option value="2026-007">2026-007 — BD Boční Veverská Bítýška</option>
+              <option value="2026-008">2026-008 — RD Velešovice 124</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Datum</div>
+            <input type="date" class="form-select" id="w-ukol-datum" style="font-size:15px;font-weight:500;">
+          </div>
+          <div class="form-group">
+            <div class="form-label">Popis úkolu</div>
+            <textarea class="form-textarea" id="w-ukol-popis" placeholder="Např. položení dlažby 40 m²"></textarea>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Dohodnutá částka (Kč)</div>
+            <div class="stepper">
+              <button class="stepper-btn" onclick="stepUkol(-500)">−</button>
+              <span class="stepper-val" id="w-ukol-display" style="font-size:24px">2000</span>
+              <span class="stepper-unit">Kč</span>
+              <button class="stepper-btn" onclick="stepUkol(500)">+</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn-submit" style="margin-top:10px" onclick="submitUkol()">Zaznamenat úkol</button>
+      </div>
     </div>
   </div>
-
-  <!-- HISTORY TAB -->
   <div id="worker-history" class="admin-panel">
     <div class="content">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <button class="stepper-btn" onclick="changeMonth(-1)" style="width:32px;height:32px">‹</button>
+        <div id="hist-month-label" style="font-size:15px;font-weight:600"></div>
+        <button class="stepper-btn" onclick="changeMonth(1)" style="width:32px;height:32px">›</button>
+      </div>
       <div class="stat-row" style="grid-template-columns:1fr 1fr 1fr 1fr">
         <div class="stat-card">
           <div class="stat-label">Odpracováno</div>
@@ -414,15 +457,56 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         </div>
         <button class="btn-submit" style="background:var(--danger);margin-top:10px" onclick="submitMgrZaloha()">Zaznamenat zálohu</button>
       </div>
+
+      <div style="margin-top:0.5rem">
+        <div class="section-label">Úkolová práce</div>
+        <div class="card">
+          <div class="form-group">
+            <div class="form-label">Zakázka</div>
+            <select class="form-select" id="mgr-ukol-zakaz">
+              <option value="">Vyber zakázku...</option>
+              <option value="2026-001">2026-001 — RD Hostěrádky-Rešov II. etapa</option>
+              <option value="2026-002">2026-002 — Byt Pekárenský dvůr</option>
+              <option value="2026-003">2026-003 — Byt Údolní</option>
+              <option value="2026-004">2026-004 — Byt Jaselská</option>
+              <option value="2026-005">2026-005 — DEK Depo</option>
+              <option value="2026-006">2026-006 — Fitness Třebíč</option>
+              <option value="2026-007">2026-007 — BD Boční Veverská Bítýška</option>
+              <option value="2026-008">2026-008 — RD Velešovice 124</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Datum</div>
+            <input type="date" class="form-select" id="mgr-ukol-datum" style="font-size:15px;font-weight:500;">
+          </div>
+          <div class="form-group">
+            <div class="form-label">Popis úkolu</div>
+            <textarea class="form-textarea" id="mgr-ukol-popis" placeholder="Např. položení dlažby 40 m²"></textarea>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Dohodnutá částka (Kč)</div>
+            <div class="stepper">
+              <button class="stepper-btn" onclick="stepMgrUkol(-500)">−</button>
+              <span class="stepper-val" id="mgr-ukol-display" style="font-size:24px">2000</span>
+              <span class="stepper-unit">Kč</span>
+              <button class="stepper-btn" onclick="stepMgrUkol(500)">+</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn-submit" style="margin-top:10px" onclick="submitMgrUkol()">Zaznamenat úkol</button>
+      </div>
     </div>
   </div>
-
-  <!-- PŘEHLED -->
   <div id="mgr-prehled" class="admin-panel">
     <div class="content">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <button class="stepper-btn" onclick="changeMonth(-1)" style="width:32px;height:32px">‹</button>
+        <div id="mgr-month-label" style="font-size:15px;font-weight:600"></div>
+        <button class="stepper-btn" onclick="changeMonth(1)" style="width:32px;height:32px">›</button>
+      </div>
       <div class="stat-row" style="grid-template-columns:1fr 1fr 1fr">
         <div class="stat-card">
-          <div class="stat-label">Tento měsíc</div>
+          <div class="stat-label">Hodiny</div>
           <div class="stat-value" id="mgr-month-hrs">0 <span class="stat-unit">h</span></div>
         </div>
         <div class="stat-card" style="background:#FCEBEB;border-color:#F09595">
@@ -434,7 +518,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
           <div class="stat-value" id="mgr-month-kc" style="font-size:16px">0 Kč</div>
         </div>
       </div>
-      <div class="section-label">Pracovníci tento měsíc</div>
+      <button class="btn-submit" style="background:var(--accent-dark);margin-bottom:1rem" onclick="exportMonth()">Export do Excelu (CSV)</button>
+      <div class="section-label">Pracovníci</div>
       <div class="card" id="mgr-workers-list"><div class="empty-state">Žádné záznamy</div></div>
       <div class="section-label">Poslední záznamy</div>
       <div class="card" id="mgr-recent-list"><div class="empty-state">Žádné záznamy</div></div>
@@ -494,15 +579,23 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 </div>
 
 <script>
-const SCRIPT_URL = localStorage.getItem('script_url') || 'https://script.google.com/macros/s/AKfycbzNJJvRZVQthgbflMpBb_Tj41T6Q5zKZHuJ39BuxiJBQSY1haKzAo-sFJuTmBPCMd0eEA/exec';
+const APP_VERSION = '2026-04-20-v5';
+const HARDCODED_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyalI5wjebm5agSeuSe07RepsDFpVCkLnY__KAP31DdCvrOsED4_MeMpTvNk10HDgkm/exec';
+// Pokud se změní verze appky, vynutí se aktuální URL (přepíše starou uloženou v prohlížeči)
+if (localStorage.getItem('app_version') !== APP_VERSION) {
+  localStorage.removeItem('script_url');
+  localStorage.setItem('app_version', APP_VERSION);
+}
+const SCRIPT_URL = localStorage.getItem('script_url') || HARDCODED_SCRIPT_URL;
 const TOKEN = 'j_PYSobT0c86bY-DMtCp7hQvJ_AgBki7';
 
 const WORKERS = {
-  '8968': { name: 'Marek Jůva', vocative: 'Marku', sazba: 400, role: 'manager' },
-  '7416': { name: 'Pepa Koblížek', vocative: 'Pepo', sazba: 400, role: 'manager' },
-  '5847': { name: 'Petr Němeček', vocative: 'Petře', sazba: 250, role: 'worker' },
-  '3356': { name: 'Franz Alexander Bundschuh', vocative: 'Franzi', sazba: 200, role: 'worker' },
-  '6193': { name: 'Stanislav Telychko', vocative: 'Stanislave', sazba: 250, role: 'worker' }
+  '896896': { name: 'Marek Jůva', vocative: 'Marku', sazba: 400, role: 'manager' },
+  '091712': { name: 'Pepa Koblížek', vocative: 'Pepo', sazba: 400, role: 'manager' },
+  '412178': { name: 'Franz Alexander Bundschuh', vocative: 'Franzi', sazba: 250, role: 'worker' },
+  '167539': { name: 'Stanislav Telychko', vocative: 'Stanislave', sazba: 250, role: 'worker' },
+  '131721': { name: 'Jaroslav Telychko', vocative: 'Jardo', sazba: 300, role: 'worker' },
+  '901028': { name: 'Olexandr Kuruts', vocative: 'Olexandře', sazba: 400, role: 'worker' }
 };
 const ADMIN_PIN = null;
 const ZAKAZKY = {
@@ -521,6 +614,29 @@ let currentUser = null;
 let currentRole = null;
 let hours = 8;
 let activeWorkerFilter = 'all';
+let selectedMonth = new Date().getFullYear()+'-'+(new Date().getMonth()+1).toString().padStart(2,'0');
+
+const MONTH_NAMES = ['leden','únor','březen','duben','květen','červen','červenec','srpen','září','říjen','listopad','prosinec'];
+
+function monthLabel(ym) {
+  const [y,m] = ym.split('-');
+  return MONTH_NAMES[parseInt(m)-1] + ' ' + y;
+}
+
+function shiftMonth(ym, delta) {
+  let [y,m] = ym.split('-').map(Number);
+  m += delta;
+  if (m < 1) { m = 12; y--; }
+  if (m > 12) { m = 1; y++; }
+  return y+'-'+String(m).padStart(2,'0');
+}
+
+// Výpočet celkové odměny záznamu: úkol má pevnou částku, jinak hodiny × sazba
+function recordCost(r) {
+  if (r.type === 'zaloha') return 0;
+  if (r.type === 'ukol') return r.castka || 0;
+  return r.cost || 0;
+}
 
 function setToday() {
   const d = new Date();
@@ -530,10 +646,10 @@ function setToday() {
 }
 
 function pinPress(d) {
-  if (pinBuffer.length >= 4) return;
+  if (pinBuffer.length >= 6) return;
   pinBuffer += d;
   updateDots();
-  if (pinBuffer.length === 4) setTimeout(checkPin, 150);
+  if (pinBuffer.length === 6) setTimeout(checkPin, 150);
 }
 
 function pinDel() {
@@ -556,6 +672,7 @@ function checkPin() {
   if (worker) {
     currentUser = worker;
     currentRole = worker.role;
+    selectedMonth = new Date().getFullYear()+'-'+(new Date().getMonth()+1).toString().padStart(2,'0');
     if (worker.role === 'manager') {
       showScreen('manager-screen');
       updateManagerFilterChips();
@@ -569,6 +686,7 @@ function checkPin() {
       document.getElementById('greeting-name').textContent = 'Dobrý den, ' + worker.vocative + '.';
       setToday();
       document.getElementById('w-zaloha-datum').value = new Date().toISOString().split('T')[0];
+      document.getElementById('w-ukol-datum').value = new Date().toISOString().split('T')[0];
       showScreen('worker-screen');
       fetchFromSheet(() => {
         loadWorkerHistory();
@@ -610,6 +728,12 @@ function workerTab(tab) {
     fetchFromSheet(() => loadWorkerHistory());
   }
   if (document.getElementById('success-screen').classList.contains('active')) showScreen('worker-screen');
+}
+
+function changeMonth(delta) {
+  selectedMonth = shiftMonth(selectedMonth, delta);
+  if (currentRole === 'manager') loadManagerData();
+  else loadWorkerHistory();
 }
 
 function getData() {
@@ -677,8 +801,8 @@ async function submitVykaz() {
   saveData(data);
 
   // Try to send to Google Sheets (if configured)
-  const scriptUrl = localStorage.getItem('script_url') || '';
-  if (scriptUrl !== '') {
+  const scriptUrl = localStorage.getItem('script_url') || SCRIPT_URL;
+  if (scriptUrl) {
     try {
       await fetch(scriptUrl, { method:'POST', body: JSON.stringify({...record, token: TOKEN}) });
     } catch(e) {}
@@ -754,17 +878,62 @@ async function submitZaloha() {
   zalohaAmount = 1000;
   document.getElementById('w-zaloha-display').textContent = '1 000';
 }
+
+let ukolAmount = 2000;
+function stepUkol(delta) {
+  ukolAmount = Math.max(500, ukolAmount + delta);
+  document.getElementById('w-ukol-display').textContent = ukolAmount.toLocaleString('cs-CZ');
+}
+
+async function submitUkol() {
+  const zakaz = document.getElementById('w-ukol-zakaz').value;
+  const datum = document.getElementById('w-ukol-datum').value;
+  const popis = document.getElementById('w-ukol-popis').value;
+  if (!zakaz) { alert('Vyber prosím zakázku'); return; }
+  if (!datum) { alert('Vyber prosím datum'); return; }
+  if (!popis.trim()) { alert('Vyplň prosím popis úkolu'); return; }
+
+  const record = {
+    id: Date.now(),
+    type: 'ukol',
+    worker: currentUser.name,
+    sazba: currentUser.sazba,
+    zakaz_id: zakaz,
+    zakaz_name: ZAKAZKY[zakaz],
+    datum: datum,
+    note: popis,
+    castka: ukolAmount,
+    ts: new Date().toISOString()
+  };
+
+  const data = getData();
+  data.unshift(record);
+  saveData(data);
+
+  const scriptUrl = localStorage.getItem('script_url') || SCRIPT_URL;
+  if (scriptUrl) {
+    try { await fetch(scriptUrl, { method:'POST', body: JSON.stringify({...record, token: TOKEN}) }); } catch(e) {}
+  }
+
+  document.getElementById('success-detail').innerHTML =
+    `Úkol <strong>${ukolAmount.toLocaleString('cs-CZ')} Kč</strong> zaznamenán<br>${record.zakaz_name} · ${datum}`;
+  showScreen('success-screen');
+  document.getElementById('w-ukol-zakaz').value = '';
+  document.getElementById('w-ukol-popis').value = '';
+  ukolAmount = 2000;
+  document.getElementById('w-ukol-display').textContent = '2 000';
+}
 function loadWorkerHistory() {
   const all = getData().filter(r => r.worker === currentUser.name);
-  const now = new Date();
-  const ym = now.getFullYear()+'-'+(now.getMonth()+1).toString().padStart(2,'0');
-  const monthData = all.filter(r => r.datum.startsWith(ym));
+  const ym = selectedMonth;
+  document.getElementById('hist-month-label').textContent = monthLabel(ym);
+  const monthData = all.filter(r => (r.datum||'').startsWith(ym));
 
-  const monthHrs = monthData.filter(r=>r.type!=='zaloha').reduce((s,r) => s+r.hours, 0);
-  const monthKcBrutto = monthData.filter(r=>r.type!=='zaloha').reduce((s,r) => s+r.cost, 0);
+  const monthHrs = monthData.filter(r=>r.type!=='zaloha'&&r.type!=='ukol').reduce((s,r) => s+(r.hours||0), 0);
+  const monthOdmena = monthData.filter(r=>r.type!=='zaloha').reduce((s,r) => s+recordCost(r), 0);
   const monthZalohy = monthData.filter(r=>r.type==='zaloha').reduce((s,r) => s+(r.zaloha||0), 0);
-  const monthKm = monthData.filter(r=>r.type!=='zaloha').reduce((s,r) => s+(r.km||0), 0);
-  const kDoplaceni = Math.max(0, monthKcBrutto - monthZalohy);
+  const monthKm = monthData.filter(r=>r.type!=='zaloha'&&r.type!=='ukol').reduce((s,r) => s+(r.km||0), 0);
+  const kDoplaceni = Math.max(0, monthOdmena - monthZalohy);
 
   document.getElementById('hist-month-hrs').innerHTML = monthHrs + ' <span class="stat-unit">h</span>';
   document.getElementById('hist-month-km').innerHTML = monthKm + ' <span class="stat-unit">km</span>';
@@ -772,22 +941,32 @@ function loadWorkerHistory() {
   document.getElementById('hist-month-kc').textContent = kDoplaceni.toLocaleString('cs-CZ') + ' Kč';
 
   const el = document.getElementById('history-list');
-  if (!all.length) { el.innerHTML = '<div class="empty-state">Zatím žádné záznamy</div>'; return; }
-  el.innerHTML = all.slice(0,30).map(r => {
+  if (!monthData.length) { el.innerHTML = '<div class="empty-state">Žádné záznamy v tomto měsíci</div>'; return; }
+  el.innerHTML = monthData.map(r => {
+    const schvaleno = r.approved ? ' <span style="color:#1D9E75;font-size:11px">✓ schváleno</span>' : '';
     if (r.type === 'zaloha') return `
       <div class="history-item">
         <div class="history-date">${r.datum.slice(5).replace('-','.')}</div>
         <div class="history-info"><div class="history-zakaz" style="color:#A32D2D">Záloha</div></div>
         <div class="history-hrs" style="color:#A32D2D">−${(r.zaloha||0).toLocaleString('cs-CZ')} Kč</div>
       </div>`;
+    if (r.type === 'ukol') return `
+      <div class="history-item">
+        <div class="history-date">${r.datum.slice(5).replace('-','.')}</div>
+        <div class="history-info">
+          <div class="history-zakaz">${r.zakaz_id} — ${r.zakaz_name} <span style="color:var(--accent-text);font-size:11px">úkol</span>${schvaleno}</div>
+          <div class="history-note">${r.note||''}</div>
+        </div>
+        <div class="history-hrs">${(r.castka||0).toLocaleString('cs-CZ')} Kč</div>
+      </div>`;
     return `
       <div class="history-item">
         <div class="history-date">${r.datum.slice(5).replace('-','.')}</div>
         <div class="history-info">
-          <div class="history-zakaz">${r.zakaz_id} — ${r.zakaz_name}</div>
+          <div class="history-zakaz">${r.zakaz_id} — ${r.zakaz_name}${schvaleno}</div>
           <div class="history-note">${r.hours}h${r.km > 0 ? ' · ' + r.km + ' km' : ''}${r.note ? ' · ' + r.note : ''}</div>
         </div>
-        <div class="history-hrs">${r.cost.toLocaleString('cs-CZ')} Kč</div>
+        <div class="history-hrs">${(r.cost||0).toLocaleString('cs-CZ')} Kč</div>
       </div>`;
   }).join('');
 }
@@ -827,6 +1006,51 @@ async function submitMgrZaloha() {
   showScreen('success-screen');
   mgrZalohaAmount = 1000;
   document.getElementById('mgr-zaloha-display').textContent = '1 000';
+}
+
+let mgrUkolAmount = 2000;
+function stepMgrUkol(delta) {
+  mgrUkolAmount = Math.max(500, mgrUkolAmount + delta);
+  document.getElementById('mgr-ukol-display').textContent = mgrUkolAmount.toLocaleString('cs-CZ');
+}
+
+async function submitMgrUkol() {
+  const zakaz = document.getElementById('mgr-ukol-zakaz').value;
+  const datum = document.getElementById('mgr-ukol-datum').value;
+  const popis = document.getElementById('mgr-ukol-popis').value;
+  if (!zakaz) { alert('Vyber prosím zakázku'); return; }
+  if (!datum) { alert('Vyber prosím datum'); return; }
+  if (!popis.trim()) { alert('Vyplň prosím popis úkolu'); return; }
+
+  const record = {
+    id: Date.now(),
+    type: 'ukol',
+    worker: currentUser.name,
+    sazba: currentUser.sazba,
+    zakaz_id: zakaz,
+    zakaz_name: ZAKAZKY[zakaz],
+    datum: datum,
+    note: popis,
+    castka: mgrUkolAmount,
+    ts: new Date().toISOString()
+  };
+
+  const data = getData();
+  data.unshift(record);
+  saveData(data);
+
+  const scriptUrl = localStorage.getItem('script_url') || SCRIPT_URL;
+  if (scriptUrl) {
+    try { await fetch(scriptUrl, { method:'POST', body: JSON.stringify({...record, token: TOKEN}) }); } catch(e) {}
+  }
+
+  document.getElementById('success-detail').innerHTML =
+    `Úkol <strong>${mgrUkolAmount.toLocaleString('cs-CZ')} Kč</strong> zaznamenán<br>${record.zakaz_name} · ${datum}`;
+  showScreen('success-screen');
+  document.getElementById('mgr-ukol-zakaz').value = '';
+  document.getElementById('mgr-ukol-popis').value = '';
+  mgrUkolAmount = 2000;
+  document.getElementById('mgr-ukol-display').textContent = '2 000';
 }
 
 let mgrHours = 8;
@@ -932,18 +1156,20 @@ function goToHistory() {
 
 function loadManagerData() {
   const data = getData();
-  const now = new Date();
-  const ym = now.getFullYear()+'-'+(now.getMonth()+1).toString().padStart(2,'0');
+  const ym = selectedMonth;
   document.getElementById('manager-header-name').textContent = currentUser.name;
-  document.getElementById('manager-header-sub').textContent = now.toLocaleDateString('cs-CZ',{month:'long',year:'numeric'});
+  document.getElementById('manager-header-sub').textContent = monthLabel(ym);
   document.getElementById('mgr-greeting-name').textContent = 'Dobrý den, ' + currentUser.vocative + '.';
   document.getElementById('mgr-greeting-date').textContent = new Date().toLocaleDateString('cs-CZ',{weekday:'long',day:'numeric',month:'long'});
   document.getElementById('mgr-datum').value = new Date().toISOString().split('T')[0];
   document.getElementById('mgr-zaloha-datum').value = new Date().toISOString().split('T')[0];
+  document.getElementById('mgr-ukol-datum').value = new Date().toISOString().split('T')[0];
+  const lbl = document.getElementById('mgr-month-label');
+  if (lbl) lbl.textContent = monthLabel(ym);
 
-  const monthData = data.filter(r => r.datum.startsWith(ym));
-  const totalHrs = monthData.filter(r=>r.type!=='zaloha').reduce((s,r)=>s+(r.hours||0),0);
-  const totalKc = monthData.filter(r=>r.type!=='zaloha').reduce((s,r)=>s+(r.cost||0),0);
+  const monthData = data.filter(r => (r.datum||'').startsWith(ym));
+  const totalHrs = monthData.filter(r=>r.type!=='zaloha'&&r.type!=='ukol').reduce((s,r)=>s+(r.hours||0),0);
+  const totalKc = monthData.filter(r=>r.type!=='zaloha').reduce((s,r)=>s+recordCost(r),0);
   const totalZalohy = monthData.filter(r=>r.type==='zaloha').reduce((s,r)=>s+(r.zaloha||0),0);
   document.getElementById('mgr-month-hrs').innerHTML = totalHrs + ' <span class="stat-unit">h</span>';
   document.getElementById('mgr-month-kc').textContent = totalKc.toLocaleString('cs-CZ')+' Kč';
@@ -957,6 +1183,8 @@ function loadManagerData() {
     if (!byWorker[r.worker]) byWorker[r.worker] = { hrs: 0, kc: 0, zalohy: 0, km: 0, sazba: r.sazba };
     if (r.type === 'zaloha') {
       byWorker[r.worker].zalohy += (r.zaloha || 0);
+    } else if (r.type === 'ukol') {
+      byWorker[r.worker].kc += (r.castka || 0);
     } else {
       byWorker[r.worker].hrs += (r.hours || 0);
       byWorker[r.worker].kc += (r.cost || 0);
@@ -990,12 +1218,17 @@ function loadManagerData() {
   }).join('');
 
   const rEl = document.getElementById('mgr-recent-list');
-  if (!data.length) { rEl.innerHTML='<div class="empty-state">Žádné záznamy</div>'; return; }
-  rEl.innerHTML = data.slice(0,8).map(r => {
+  if (!monthData.length) { rEl.innerHTML='<div class="empty-state">Žádné záznamy</div>'; return; }
+  rEl.innerHTML = monthData.slice(0,8).map(r => {
     if (r.type === 'zaloha') return `
       <div class="log-row" style="background:#FFF5F5">
         <div><div class="log-worker" style="color:#A32D2D">${r.worker}</div><div class="log-detail">${r.datum} · Záloha</div></div>
         <div class="log-right"><div class="log-hrs" style="color:#A32D2D">−${(r.zaloha||0).toLocaleString('cs-CZ')} Kč</div></div>
+      </div>`;
+    if (r.type === 'ukol') return `
+      <div class="log-row">
+        <div><div class="log-worker">${r.worker}</div><div class="log-detail">${r.datum} · ${r.zakaz_id||''} · úkol</div></div>
+        <div class="log-right"><div class="log-cost">${(r.castka||0).toLocaleString('cs-CZ')} Kč</div></div>
       </div>`;
     return `
       <div class="log-row">
@@ -1007,7 +1240,7 @@ function loadManagerData() {
 
 function deleteRecord(id) {
   if (!confirm('Smazat tento záznam?')) return;
-  const data = getData().filter(r => r.id !== id);
+  const data = getData().filter(r => String(r.id) !== String(id));
   saveData(data);
   renderMgrLogs();
   loadManagerData();
@@ -1027,23 +1260,137 @@ function renderMgrLogs() {
   const el = document.getElementById('mgr-all-logs');
   if (!data.length) { el.innerHTML='<div class="empty-state">Žádné záznamy</div>'; return; }
   el.innerHTML = data.map(r => {
+    const btns = `
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <button onclick="editRecord(${r.id})" style="background:none;border:none;color:#aaa;font-size:14px;cursor:pointer;padding:2px" title="Upravit">✎</button>
+        <button onclick="deleteRecord(${r.id})" style="background:none;border:none;color:#ccc;font-size:15px;cursor:pointer;padding:2px" title="Smazat">✕</button>
+      </div>`;
     if (r.type === 'zaloha') return `
       <div class="log-row" style="background:#FFF5F5">
         <div><div class="log-worker" style="color:#A32D2D">${r.worker}</div><div class="log-detail">${r.datum} · Záloha</div></div>
-        <div class="log-right" style="display:flex;align-items:center;gap:10px">
+        <div class="log-right" style="display:flex;align-items:center;gap:8px">
           <div><div class="log-hrs" style="color:#A32D2D">−${(r.zaloha||0).toLocaleString('cs-CZ')} Kč</div></div>
-          <button onclick="deleteRecord(${r.id})" style="background:none;border:none;color:#ccc;font-size:16px;cursor:pointer;padding:4px;line-height:1" title="Smazat">✕</button>
+          ${btns}
+        </div>
+      </div>`;
+    const approveBtn = `<button onclick="toggleApprove(${r.id})" style="background:${r.approved?'#1D9E75':'none'};border:1px solid ${r.approved?'#1D9E75':'#ccc'};color:${r.approved?'#fff':'#999'};font-size:11px;cursor:pointer;padding:2px 8px;border-radius:10px;white-space:nowrap">${r.approved?'✓ schváleno':'schválit'}</button>`;
+    if (r.type === 'ukol') return `
+      <div class="log-row">
+        <div><div class="log-worker">${r.worker} <span style="color:var(--accent-text);font-size:11px;font-weight:400">úkol</span></div><div class="log-detail">${r.datum} · ${r.zakaz_id} — ${r.zakaz_name}${r.note?'<br>'+r.note:''}</div><div style="margin-top:6px">${approveBtn}</div></div>
+        <div class="log-right" style="display:flex;align-items:center;gap:8px">
+          <div><div class="log-cost" style="font-weight:600">${(r.castka||0).toLocaleString('cs-CZ')} Kč</div></div>
+          ${btns}
         </div>
       </div>`;
     return `
       <div class="log-row">
-        <div><div class="log-worker">${r.worker}</div><div class="log-detail">${r.datum} · ${r.zakaz_id} — ${r.zakaz_name}${r.km > 0 ? ' · ' + r.km + ' km' : ''}${r.note?'<br>'+r.note:''}</div></div>
-        <div class="log-right" style="display:flex;align-items:center;gap:10px">
+        <div><div class="log-worker">${r.worker}</div><div class="log-detail">${r.datum} · ${r.zakaz_id} — ${r.zakaz_name}${r.km > 0 ? ' · ' + r.km + ' km' : ''}${r.note?'<br>'+r.note:''}</div><div style="margin-top:6px">${approveBtn}</div></div>
+        <div class="log-right" style="display:flex;align-items:center;gap:8px">
           <div><div class="log-hrs">${r.hours}h</div><div class="log-cost">${(r.cost||0).toLocaleString('cs-CZ')} Kč</div></div>
-          <button onclick="deleteRecord(${r.id})" style="background:none;border:none;color:#ccc;font-size:16px;cursor:pointer;padding:4px;line-height:1" title="Smazat">✕</button>
+          ${btns}
         </div>
       </div>`;
   }).join('');
+}
+
+function toggleApprove(id) {
+  const data = getData();
+  const rec = data.find(r => String(r.id) === String(id));
+  if (rec) {
+    rec.approved = !rec.approved;
+    saveData(data);
+    renderMgrLogs();
+    const scriptUrl = localStorage.getItem('script_url') || SCRIPT_URL;
+    if (scriptUrl) {
+      const cbName = 'jsonp_appr_' + Date.now();
+      window[cbName] = function() { delete window[cbName]; try{document.head.removeChild(s);}catch(e){} };
+      const s = document.createElement('script');
+      s.src = scriptUrl + '?action=approve&id=' + encodeURIComponent(id) + '&approved=' + (rec.approved?'1':'0') + '&token=' + encodeURIComponent(TOKEN) + '&callback=' + cbName;
+      document.head.appendChild(s);
+    }
+  }
+}
+
+function editRecord(id) {
+  const data = getData();
+  const rec = data.find(r => String(r.id) === String(id));
+  if (!rec) return;
+  if (rec.type === 'zaloha') {
+    const nova = prompt('Upravit částku zálohy (Kč):', rec.zaloha);
+    if (nova === null) return;
+    const v = parseInt(nova.replace(/\s/g,''));
+    if (isNaN(v)) { alert('Neplatná částka'); return; }
+    rec.zaloha = v;
+  } else if (rec.type === 'ukol') {
+    const novaC = prompt('Upravit částku úkolu (Kč):', rec.castka);
+    if (novaC === null) return;
+    const v = parseInt(novaC.replace(/\s/g,''));
+    if (isNaN(v)) { alert('Neplatná částka'); return; }
+    rec.castka = v;
+    const novyP = prompt('Upravit popis úkolu:', rec.note || '');
+    if (novyP !== null) rec.note = novyP;
+  } else {
+    const noveH = prompt('Upravit počet hodin:', rec.hours);
+    if (noveH === null) return;
+    const h = parseFloat(noveH.replace(',','.'));
+    if (isNaN(h)) { alert('Neplatný počet hodin'); return; }
+    rec.hours = h;
+    rec.cost = h * (rec.sazba || 0);
+    const noveKm = prompt('Upravit km:', rec.km || 0);
+    if (noveKm !== null) { const k = parseInt(noveKm); if (!isNaN(k)) rec.km = k; }
+    const novaP = prompt('Upravit poznámku:', rec.note || '');
+    if (novaP !== null) rec.note = novaP;
+  }
+  saveData(data);
+  renderMgrLogs();
+  loadManagerData();
+  // Edit v Sheetu: smažeme starý a zapíšeme nový
+  const scriptUrl = localStorage.getItem('script_url') || SCRIPT_URL;
+  if (scriptUrl) {
+    const cbName = 'jsonp_edit_' + Date.now();
+    window[cbName] = function() {
+      delete window[cbName];
+      try{document.head.removeChild(s);}catch(e){}
+      fetch(scriptUrl, { method:'POST', body: JSON.stringify({...rec, token: TOKEN}) }).catch(()=>{});
+    };
+    const s = document.createElement('script');
+    s.src = scriptUrl + '?action=delete&id=' + encodeURIComponent(id) + '&token=' + encodeURIComponent(TOKEN) + '&callback=' + cbName;
+    document.head.appendChild(s);
+  }
+}
+
+function exportMonth() {
+  const ym = selectedMonth;
+  const data = getData().filter(r => (r.datum||'').startsWith(ym));
+  if (!data.length) { alert('Žádné záznamy k exportu v měsíci ' + monthLabel(ym)); return; }
+  const head = ['Datum','Pracovník','Typ','Zakázka','Hodiny','Km','Sazba','Odměna Kč','Záloha Kč','Schváleno','Poznámka'];
+  const rows = data.map(r => {
+    const typ = r.type === 'zaloha' ? 'Záloha' : (r.type === 'ukol' ? 'Úkol' : 'Výkaz');
+    return [
+      r.datum||'',
+      r.worker||'',
+      typ,
+      r.type==='zaloha' ? '' : ((r.zakaz_id||'')+' '+(r.zakaz_name||'')),
+      r.type==='zaloha'||r.type==='ukol' ? '' : (r.hours||0),
+      r.type==='zaloha'||r.type==='ukol' ? '' : (r.km||0),
+      r.sazba||'',
+      r.type==='zaloha' ? '' : recordCost(r),
+      r.type==='zaloha' ? (r.zaloha||0) : '',
+      r.approved ? 'ano' : '',
+      (r.note||'').replace(/"/g,'""')
+    ];
+  });
+  let csv = '\uFEFF' + head.join(';') + '\n';
+  csv += rows.map(row => row.map(c => `"${c}"`).join(';')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'AMP_vykaz_' + ym + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 function renderMgrZakazky() {
@@ -1051,13 +1398,20 @@ function renderMgrZakazky() {
   const el = document.getElementById('mgr-zakazky-list');
   const byZakaz = {};
   Object.entries(ZAKAZKY).forEach(([id,name])=>byZakaz[id]={name,hrs:0,kc:0,km:0,workers:new Set()});
-  data.forEach(r=>{ if(byZakaz[r.zakaz_id]){ byZakaz[r.zakaz_id].hrs+=(r.hours||0); byZakaz[r.zakaz_id].kc+=(r.cost||0); byZakaz[r.zakaz_id].km+=(r.km||0); byZakaz[r.zakaz_id].workers.add(r.worker); } });
+  data.forEach(r=>{
+    if(byZakaz[r.zakaz_id]){
+      byZakaz[r.zakaz_id].hrs += (r.hours||0);
+      byZakaz[r.zakaz_id].kc += recordCost(r);
+      byZakaz[r.zakaz_id].km += (r.km||0);
+      byZakaz[r.zakaz_id].workers.add(r.worker);
+    }
+  });
   el.innerHTML = Object.entries(byZakaz).map(([id,z])=>`
     <div class="zakaz-card">
       <div class="zakaz-header"><div class="zakaz-name">${z.name}</div><div class="zakaz-id">${id}</div></div>
       <div class="zakaz-stats">
         <div class="zakaz-stat"><div class="v">${z.hrs}</div><div class="l">hodin</div></div>
-        <div class="zakaz-stat"><div class="v">${z.km > 0 ? z.km + ' km' : z.kc>0?Math.round(z.kc/1000)+'k Kč':'—'}</div><div class="l">${z.km > 0 ? 'km' : 'Kč'}</div></div>
+        <div class="zakaz-stat"><div class="v">${z.kc.toLocaleString('cs-CZ')}</div><div class="l">Kč náklady</div></div>
         <div class="zakaz-stat"><div class="v">${z.workers.size}</div><div class="l">pracovníků</div></div>
       </div>
     </div>`).join('');
