@@ -85,6 +85,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .stepper-btn:active { background: var(--accent-light); }
 .stepper-val { font-family: 'DM Mono', monospace; font-size: 32px; font-weight: 500; min-width: 56px; text-align: center; }
 .stepper-unit { font-size: 14px; color: var(--muted); }
+.num-input { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 500; border: none; border-bottom: 1.5px solid var(--border); background: transparent; color: var(--text); width: 110px; outline: none; padding: 2px 0; -moz-appearance: textfield; }
+.num-input:focus { border-bottom-color: var(--accent); }
+.num-input::-webkit-outer-spin-button, .num-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.num-row { display: flex; align-items: baseline; gap: 8px; }
 
 /* DATE PICKER */
 .date-display { font-size: 15px; font-weight: 500; }
@@ -247,20 +251,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
           </div>
           <div class="form-group">
             <div class="form-label">Počet hodin</div>
-            <div class="stepper">
-              <button class="stepper-btn" onclick="stepHours(-0.5)">−</button>
-              <span class="stepper-val" id="w-hours-display">8</span>
+            <div class="num-row">
+              <input type="number" inputmode="decimal" step="0.5" min="0" class="num-input" id="w-hours-input" value="8" oninput="hours=parseFloat(this.value)||0">
               <span class="stepper-unit">h</span>
-              <button class="stepper-btn" onclick="stepHours(0.5)">+</button>
             </div>
           </div>
           <div class="form-group">
             <div class="form-label">Najeté km (volitelné)</div>
-            <div class="stepper">
-              <button class="stepper-btn" onclick="stepKm(-1)">−</button>
-              <span class="stepper-val" id="w-km-display">0</span>
+            <div class="num-row">
+              <input type="number" inputmode="numeric" step="1" min="0" class="num-input" id="w-km-input" value="0" oninput="km=parseInt(this.value)||0">
               <span class="stepper-unit">km</span>
-              <button class="stepper-btn" onclick="stepKm(1)">+</button>
             </div>
           </div>
           <div class="form-group">
@@ -270,7 +270,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         </div>
       </div>
 
-      <button class="btn-submit" id="w-submit" onclick="submitVykaz()">Odeslat výkaz</button>
+      <button class="btn-submit" id="w-submit" onclick="submitVykaz(event)">Odeslat výkaz</button>
 
       <div style="margin-top:0.5rem">
         <div class="section-label">Záloha</div>
@@ -281,15 +281,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
           </div>
           <div class="form-group">
             <div class="form-label">Částka (Kč)</div>
-            <div class="stepper">
-              <button class="stepper-btn" onclick="stepZaloha(-500)">−</button>
-              <span class="stepper-val" id="w-zaloha-display" style="font-size:24px">1000</span>
+            <div class="num-row">
+              <input type="number" inputmode="numeric" step="100" min="0" class="num-input" id="w-zaloha-input" value="1000" oninput="zalohaAmount=parseInt(this.value)||0">
               <span class="stepper-unit">Kč</span>
-              <button class="stepper-btn" onclick="stepZaloha(500)">+</button>
             </div>
           </div>
         </div>
-        <button class="btn-submit" style="background:var(--danger);margin-top:10px" onclick="submitZaloha()">Zaznamenat zálohu</button>
+        <button class="btn-submit" style="background:var(--danger);margin-top:10px" onclick="submitZaloha(event)">Zaznamenat zálohu</button>
       </div>
 
       <div style="margin-top:0.5rem">
@@ -319,15 +317,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
           </div>
           <div class="form-group">
             <div class="form-label">Dohodnutá částka (Kč)</div>
-            <div class="stepper">
-              <button class="stepper-btn" onclick="stepUkol(-500)">−</button>
-              <span class="stepper-val" id="w-ukol-display" style="font-size:24px">2000</span>
+            <div class="num-row">
+              <input type="number" inputmode="numeric" step="100" min="0" class="num-input" id="w-ukol-input" value="2000" oninput="ukolAmount=parseInt(this.value)||0">
               <span class="stepper-unit">Kč</span>
-              <button class="stepper-btn" onclick="stepUkol(500)">+</button>
             </div>
           </div>
         </div>
-        <button class="btn-submit" style="margin-top:10px" onclick="submitUkol()">Zaznamenat úkol</button>
+        <button class="btn-submit" style="margin-top:10px" onclick="submitUkol(event)">Zaznamenat úkol</button>
       </div>
     </div>
   </div>
@@ -414,20 +410,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
           </div>
           <div class="form-group">
             <div class="form-label">Počet hodin</div>
-            <div class="stepper">
-              <button class="stepper-btn" onclick="stepMgrHours(-0.5)">−</button>
-              <span class="stepper-val" id="mgr-hours-display">8</span>
+            <div class="num-row">
+              <input type="number" inputmode="decimal" step="0.5" min="0" class="num-input" id="mgr-hours-input" value="8" oninput="mgrHours=parseFloat(this.value)||0">
               <span class="stepper-unit">h</span>
-              <button class="stepper-btn" onclick="stepMgrHours(0.5)">+</button>
             </div>
           </div>
           <div class="form-group">
             <div class="form-label">Najeté km (volitelné)</div>
-            <div class="stepper">
-              <button class="stepper-btn" onclick="stepMgrKm(-1)">−</button>
-              <span class="stepper-val" id="mgr-km-display">0</span>
+            <div class="num-row">
+              <input type="number" inputmode="numeric" step="1" min="0" class="num-input" id="mgr-km-input" value="0" oninput="mgrKm=parseInt(this.value)||0">
               <span class="stepper-unit">km</span>
-              <button class="stepper-btn" onclick="stepMgrKm(1)">+</button>
             </div>
           </div>
           <div class="form-group">
@@ -436,7 +428,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
           </div>
         </div>
       </div>
-      <button class="btn-submit" onclick="submitMgrVykaz()">Odeslat výkaz</button>
+      <button class="btn-submit" onclick="submitMgrVykaz(event)">Odeslat výkaz</button>
 
       <div style="margin-top:0.5rem">
         <div class="section-label">Záloha</div>
@@ -447,15 +439,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
           </div>
           <div class="form-group">
             <div class="form-label">Částka (Kč)</div>
-            <div class="stepper">
-              <button class="stepper-btn" onclick="stepMgrZaloha(-500)">−</button>
-              <span class="stepper-val" id="mgr-zaloha-display" style="font-size:24px">1000</span>
+            <div class="num-row">
+              <input type="number" inputmode="numeric" step="100" min="0" class="num-input" id="mgr-zaloha-input" value="1000" oninput="mgrZalohaAmount=parseInt(this.value)||0">
               <span class="stepper-unit">Kč</span>
-              <button class="stepper-btn" onclick="stepMgrZaloha(500)">+</button>
             </div>
           </div>
         </div>
-        <button class="btn-submit" style="background:var(--danger);margin-top:10px" onclick="submitMgrZaloha()">Zaznamenat zálohu</button>
+        <button class="btn-submit" style="background:var(--danger);margin-top:10px" onclick="submitMgrZaloha(event)">Zaznamenat zálohu</button>
       </div>
 
       <div style="margin-top:0.5rem">
@@ -485,15 +475,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
           </div>
           <div class="form-group">
             <div class="form-label">Dohodnutá částka (Kč)</div>
-            <div class="stepper">
-              <button class="stepper-btn" onclick="stepMgrUkol(-500)">−</button>
-              <span class="stepper-val" id="mgr-ukol-display" style="font-size:24px">2000</span>
+            <div class="num-row">
+              <input type="number" inputmode="numeric" step="100" min="0" class="num-input" id="mgr-ukol-input" value="2000" oninput="mgrUkolAmount=parseInt(this.value)||0">
               <span class="stepper-unit">Kč</span>
-              <button class="stepper-btn" onclick="stepMgrUkol(500)">+</button>
             </div>
           </div>
         </div>
-        <button class="btn-submit" style="margin-top:10px" onclick="submitMgrUkol()">Zaznamenat úkol</button>
+        <button class="btn-submit" style="margin-top:10px" onclick="submitMgrUkol(event)">Zaznamenat úkol</button>
       </div>
     </div>
   </div>
@@ -579,7 +567,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 </div>
 
 <script>
-const APP_VERSION = '2026-04-20-v5';
+const APP_VERSION = '2026-04-20-v7';
 const HARDCODED_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyalI5wjebm5agSeuSe07RepsDFpVCkLnY__KAP31DdCvrOsED4_MeMpTvNk10HDgkm/exec';
 // Pokud se změní verze appky, vynutí se aktuální URL (přepíše starou uloženou v prohlížeči)
 if (localStorage.getItem('app_version') !== APP_VERSION) {
@@ -717,7 +705,7 @@ function logout() {
 
 function stepHours(delta) {
   hours = Math.max(0.5, Math.min(12, hours + delta));
-  document.getElementById('w-hours-display').textContent = hours % 1 === 0 ? hours : hours.toFixed(1);
+  var el=document.getElementById('w-hours-input'); if(el) el.value = hours;
 }
 
 function workerTab(tab) {
@@ -741,6 +729,28 @@ function getData() {
 }
 function saveData(data) {
   localStorage.setItem('vykazy', JSON.stringify(data));
+}
+
+// Pojistka proti dvojímu odeslání
+let submitting = false;
+
+// Odešle záznam do Sheetu. Vrací true při úspěchu, false při selhání.
+// Záznam ukládá lokálně AŽ po úspěšném zápisu, aby nevznikaly duplikáty bez synchronizace.
+async function postRecord(record, btn) {
+  const scriptUrl = localStorage.getItem('script_url') || SCRIPT_URL;
+  if (!scriptUrl) {
+    // bez serveru ukládáme jen lokálně
+    const data = getData(); data.unshift(record); saveData(data);
+    return true;
+  }
+  try {
+    await fetch(scriptUrl, { method:'POST', body: JSON.stringify({...record, token: TOKEN}) });
+    // zápis prošel — ulož i lokálně pro okamžité zobrazení
+    const data = getData(); data.unshift(record); saveData(data);
+    return true;
+  } catch(e) {
+    return false;
+  }
 }
 
 function fetchFromSheet(callback) {
@@ -774,7 +784,8 @@ function fetchFromSheet(callback) {
   }, 10000);
 }
 
-async function submitVykaz() {
+async function submitVykaz(ev) {
+  if (submitting) return;
   const zakaz = document.getElementById('w-zakaz').value;
   const datum = document.getElementById('w-datum').value;
   const note = document.getElementById('w-note').value;
@@ -795,17 +806,18 @@ async function submitVykaz() {
     ts: new Date().toISOString()
   };
 
-  // Save locally
-  const data = getData();
-  data.unshift(record);
-  saveData(data);
+  const btn = ev && ev.target ? ev.target : null;
+  submitting = true;
+  if (btn) { btn.disabled = true; btn.textContent = 'Odesílám…'; }
 
-  // Try to send to Google Sheets (if configured)
-  const scriptUrl = localStorage.getItem('script_url') || SCRIPT_URL;
-  if (scriptUrl) {
-    try {
-      await fetch(scriptUrl, { method:'POST', body: JSON.stringify({...record, token: TOKEN}) });
-    } catch(e) {}
+  const ok = await postRecord(record, btn);
+
+  submitting = false;
+  if (btn) { btn.disabled = false; btn.textContent = 'Odeslat výkaz'; }
+
+  if (!ok) {
+    alert('Výkaz se nepodařilo odeslat. Zkontroluj připojení k internetu a zkus to znovu. (Záznam NEBYL uložen, neodesílej víckrát.)');
+    return;
   }
 
   document.getElementById('success-detail').innerHTML =
@@ -815,8 +827,8 @@ async function submitVykaz() {
   document.getElementById('w-note').value = '';
   hours = 8;
   km = 0;
-  document.getElementById('w-hours-display').textContent = '8';
-  document.getElementById('w-km-display').textContent = '0';
+  document.getElementById('w-hours-input').value = '8';
+  document.getElementById('w-km-input').value = '0';
 }
 
 function newVykaz() {
@@ -834,22 +846,23 @@ let mgrKm = 0;
 
 function stepKm(delta) {
   km = Math.max(0, km + delta);
-  document.getElementById('w-km-display').textContent = km;
+  var el=document.getElementById('w-km-input'); if(el) el.value = km;
 }
 
 function stepMgrKm(delta) {
   mgrKm = Math.max(0, mgrKm + delta);
-  document.getElementById('mgr-km-display').textContent = mgrKm;
+  var el=document.getElementById('mgr-km-input'); if(el) el.value = mgrKm;
 }
 
 let zalohaAmount = 1000;
 
 function stepZaloha(delta) {
   zalohaAmount = Math.max(500, zalohaAmount + delta);
-  document.getElementById('w-zaloha-display').textContent = zalohaAmount.toLocaleString('cs-CZ');
+  var el=document.getElementById('w-zaloha-input'); if(el) el.value = zalohaAmount;
 }
 
-async function submitZaloha() {
+async function submitZaloha(ev) {
+  if (submitting) return;
   const datum = document.getElementById('w-zaloha-datum').value;
   if (!datum) { alert('Vyber prosím datum zálohy'); return; }
 
@@ -863,29 +876,29 @@ async function submitZaloha() {
     ts: new Date().toISOString()
   };
 
-  const data = getData();
-  data.unshift(record);
-  saveData(data);
-
-  const scriptUrl = localStorage.getItem('script_url') || SCRIPT_URL;
-  if (scriptUrl) {
-    try { await fetch(scriptUrl, { method:'POST', body: JSON.stringify({...record, token: TOKEN}) }); } catch(e) {}
-  }
+  const btn = ev && ev.target ? ev.target : null;
+  submitting = true;
+  if (btn) { btn.disabled = true; btn.textContent = 'Odesílám…'; }
+  const ok = await postRecord(record, btn);
+  submitting = false;
+  if (btn) { btn.disabled = false; btn.textContent = 'Zaznamenat zálohu'; }
+  if (!ok) { alert('Zálohu se nepodařilo odeslat. Zkontroluj připojení a zkus to znovu. (Záznam NEBYL uložen.)'); return; }
 
   document.getElementById('success-detail').innerHTML =
     `Záloha <strong>${zalohaAmount.toLocaleString('cs-CZ')} Kč</strong> zaznamenána<br>${datum}`;
   showScreen('success-screen');
   zalohaAmount = 1000;
-  document.getElementById('w-zaloha-display').textContent = '1 000';
+  document.getElementById('w-zaloha-input').value = '1000';
 }
 
 let ukolAmount = 2000;
 function stepUkol(delta) {
   ukolAmount = Math.max(500, ukolAmount + delta);
-  document.getElementById('w-ukol-display').textContent = ukolAmount.toLocaleString('cs-CZ');
+  var el=document.getElementById('w-ukol-input'); if(el) el.value = ukolAmount;
 }
 
-async function submitUkol() {
+async function submitUkol(ev) {
+  if (submitting) return;
   const zakaz = document.getElementById('w-ukol-zakaz').value;
   const datum = document.getElementById('w-ukol-datum').value;
   const popis = document.getElementById('w-ukol-popis').value;
@@ -906,14 +919,13 @@ async function submitUkol() {
     ts: new Date().toISOString()
   };
 
-  const data = getData();
-  data.unshift(record);
-  saveData(data);
-
-  const scriptUrl = localStorage.getItem('script_url') || SCRIPT_URL;
-  if (scriptUrl) {
-    try { await fetch(scriptUrl, { method:'POST', body: JSON.stringify({...record, token: TOKEN}) }); } catch(e) {}
-  }
+  const btn = ev && ev.target ? ev.target : null;
+  submitting = true;
+  if (btn) { btn.disabled = true; btn.textContent = 'Odesílám…'; }
+  const ok = await postRecord(record, btn);
+  submitting = false;
+  if (btn) { btn.disabled = false; btn.textContent = 'Zaznamenat úkol'; }
+  if (!ok) { alert('Úkol se nepodařilo odeslat. Zkontroluj připojení a zkus to znovu. (Záznam NEBYL uložen.)'); return; }
 
   document.getElementById('success-detail').innerHTML =
     `Úkol <strong>${ukolAmount.toLocaleString('cs-CZ')} Kč</strong> zaznamenán<br>${record.zakaz_name} · ${datum}`;
@@ -921,10 +933,11 @@ async function submitUkol() {
   document.getElementById('w-ukol-zakaz').value = '';
   document.getElementById('w-ukol-popis').value = '';
   ukolAmount = 2000;
-  document.getElementById('w-ukol-display').textContent = '2 000';
+  document.getElementById('w-ukol-input').value = '2000';
 }
 function loadWorkerHistory() {
-  const all = getData().filter(r => r.worker === currentUser.name);
+  const myName = (currentUser.name||'').trim();
+  const all = getData().filter(r => (r.worker||'').trim() === myName);
   const ym = selectedMonth;
   document.getElementById('hist-month-label').textContent = monthLabel(ym);
   const monthData = all.filter(r => (r.datum||'').startsWith(ym));
@@ -975,10 +988,11 @@ let mgrZalohaAmount = 1000;
 
 function stepMgrZaloha(delta) {
   mgrZalohaAmount = Math.max(500, mgrZalohaAmount + delta);
-  document.getElementById('mgr-zaloha-display').textContent = mgrZalohaAmount.toLocaleString('cs-CZ');
+  var el=document.getElementById('mgr-zaloha-input'); if(el) el.value = mgrZalohaAmount;
 }
 
-async function submitMgrZaloha() {
+async function submitMgrZaloha(ev) {
+  if (submitting) return;
   const datum = document.getElementById('mgr-zaloha-datum').value;
   if (!datum) { alert('Vyber prosím datum zálohy'); return; }
 
@@ -992,29 +1006,29 @@ async function submitMgrZaloha() {
     ts: new Date().toISOString()
   };
 
-  const data = getData();
-  data.unshift(record);
-  saveData(data);
-
-  const scriptUrl = localStorage.getItem('script_url') || SCRIPT_URL;
-  if (scriptUrl) {
-    try { await fetch(scriptUrl, { method:'POST', body: JSON.stringify({...record, token: TOKEN}) }); } catch(e) {}
-  }
+  const btn = ev && ev.target ? ev.target : null;
+  submitting = true;
+  if (btn) { btn.disabled = true; btn.textContent = 'Odesílám…'; }
+  const ok = await postRecord(record, btn);
+  submitting = false;
+  if (btn) { btn.disabled = false; btn.textContent = 'Zaznamenat zálohu'; }
+  if (!ok) { alert('Zálohu se nepodařilo odeslat. Zkontroluj připojení a zkus to znovu. (Záznam NEBYL uložen.)'); return; }
 
   document.getElementById('success-detail').innerHTML =
     `Záloha <strong>${mgrZalohaAmount.toLocaleString('cs-CZ')} Kč</strong> zaznamenána<br>${datum}`;
   showScreen('success-screen');
   mgrZalohaAmount = 1000;
-  document.getElementById('mgr-zaloha-display').textContent = '1 000';
+  document.getElementById('mgr-zaloha-input').value = '1000';
 }
 
 let mgrUkolAmount = 2000;
 function stepMgrUkol(delta) {
   mgrUkolAmount = Math.max(500, mgrUkolAmount + delta);
-  document.getElementById('mgr-ukol-display').textContent = mgrUkolAmount.toLocaleString('cs-CZ');
+  var el=document.getElementById('mgr-ukol-input'); if(el) el.value = mgrUkolAmount;
 }
 
-async function submitMgrUkol() {
+async function submitMgrUkol(ev) {
+  if (submitting) return;
   const zakaz = document.getElementById('mgr-ukol-zakaz').value;
   const datum = document.getElementById('mgr-ukol-datum').value;
   const popis = document.getElementById('mgr-ukol-popis').value;
@@ -1035,14 +1049,13 @@ async function submitMgrUkol() {
     ts: new Date().toISOString()
   };
 
-  const data = getData();
-  data.unshift(record);
-  saveData(data);
-
-  const scriptUrl = localStorage.getItem('script_url') || SCRIPT_URL;
-  if (scriptUrl) {
-    try { await fetch(scriptUrl, { method:'POST', body: JSON.stringify({...record, token: TOKEN}) }); } catch(e) {}
-  }
+  const btn = ev && ev.target ? ev.target : null;
+  submitting = true;
+  if (btn) { btn.disabled = true; btn.textContent = 'Odesílám…'; }
+  const ok = await postRecord(record, btn);
+  submitting = false;
+  if (btn) { btn.disabled = false; btn.textContent = 'Zaznamenat úkol'; }
+  if (!ok) { alert('Úkol se nepodařilo odeslat. Zkontroluj připojení a zkus to znovu. (Záznam NEBYL uložen.)'); return; }
 
   document.getElementById('success-detail').innerHTML =
     `Úkol <strong>${mgrUkolAmount.toLocaleString('cs-CZ')} Kč</strong> zaznamenán<br>${record.zakaz_name} · ${datum}`;
@@ -1050,7 +1063,7 @@ async function submitMgrUkol() {
   document.getElementById('mgr-ukol-zakaz').value = '';
   document.getElementById('mgr-ukol-popis').value = '';
   mgrUkolAmount = 2000;
-  document.getElementById('mgr-ukol-display').textContent = '2 000';
+  document.getElementById('mgr-ukol-input').value = '2000';
 }
 
 let mgrHours = 8;
@@ -1086,7 +1099,7 @@ function saveScriptUrl() {
 
 function stepMgrHours(delta) {
   mgrHours = Math.max(0.5, Math.min(12, mgrHours + delta));
-  document.getElementById('mgr-hours-display').textContent = mgrHours % 1 === 0 ? mgrHours : mgrHours.toFixed(1);
+  var el=document.getElementById('mgr-hours-input'); if(el) el.value = mgrHours;
 }
 
 function updateManagerFilterChips() {
@@ -1103,7 +1116,8 @@ function mgrFilterWorker(name, el) {
   renderMgrLogs();
 }
 
-async function submitMgrVykaz() {
+async function submitMgrVykaz(ev) {
+  if (submitting) return;
   const zakaz = document.getElementById('mgr-zakaz').value;
   const datum = document.getElementById('mgr-datum').value;
   const note = document.getElementById('mgr-note').value;
@@ -1124,14 +1138,13 @@ async function submitMgrVykaz() {
     ts: new Date().toISOString()
   };
 
-  const data = getData();
-  data.unshift(record);
-  saveData(data);
-
-  const scriptUrl = localStorage.getItem('script_url') || SCRIPT_URL;
-  if (scriptUrl) {
-    try { await fetch(scriptUrl, { method:'POST', body: JSON.stringify({...record, token: TOKEN}) }); } catch(e) {}
-  }
+  const btn = ev && ev.target ? ev.target : null;
+  submitting = true;
+  if (btn) { btn.disabled = true; btn.textContent = 'Odesílám…'; }
+  const ok = await postRecord(record, btn);
+  submitting = false;
+  if (btn) { btn.disabled = false; btn.textContent = 'Odeslat výkaz'; }
+  if (!ok) { alert('Výkaz se nepodařilo odeslat. Zkontroluj připojení a zkus to znovu. (Záznam NEBYL uložen.)'); return; }
 
   document.getElementById('success-detail').innerHTML =
     `<strong>${record.zakaz_name}</strong><br>${record.datum} · ${mgrHours} h${mgrKm > 0 ? ' · ' + mgrKm + ' km' : ''} · ${record.cost.toLocaleString('cs-CZ')} Kč`;
@@ -1140,8 +1153,8 @@ async function submitMgrVykaz() {
   document.getElementById('mgr-note').value = '';
   mgrHours = 8;
   mgrKm = 0;
-  document.getElementById('mgr-hours-display').textContent = '8';
-  document.getElementById('mgr-km-display').textContent = '0';
+  document.getElementById('mgr-hours-input').value = '8';
+  document.getElementById('mgr-km-input').value = '0';
 }
 
 function goToHistory() {
