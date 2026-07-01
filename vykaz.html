@@ -200,6 +200,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <div class="pin-key del" onclick="pinDel()">⌫</div>
     </div>
     <div class="pin-error" id="pin-error"></div>
+    <div id="version-label" style="text-align:center;font-size:11px;color:var(--muted);margin-top:1.5rem;opacity:0.6"></div>
   </div>
 </div>
 
@@ -567,8 +568,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 </div>
 
 <script>
-const APP_VERSION = '2026-04-20-v7';
-const HARDCODED_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyalI5wjebm5agSeuSe07RepsDFpVCkLnY__KAP31DdCvrOsED4_MeMpTvNk10HDgkm/exec';
+const APP_VERSION = '2026-04-20-v11';
+const HARDCODED_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyLL1gwqnXKS4uCHaII6ytDkZcalptJR1ispOP9KWXr7Z_C3PoBfvqu2spHi1MarFQNAw/exec';
 // Pokud se změní verze appky, vynutí se aktuální URL (přepíše starou uloženou v prohlížeči)
 if (localStorage.getItem('app_version') !== APP_VERSION) {
   localStorage.removeItem('script_url');
@@ -619,6 +620,38 @@ function shiftMonth(ym, delta) {
   return y+'-'+String(m).padStart(2,'0');
 }
 
+// Vrátí měsíc (YYYY-MM) nejnovějšího záznamu, jinak aktuální měsíc.
+function mostRecentMonth(records) {
+  const months = (records||[])
+    .map(r => normalizeDatum(r.datum).slice(0,7))
+    .filter(s => /^\d{4}-\d{2}$/.test(s));
+  if (!months.length) return new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0');
+  months.sort();
+  return months[months.length-1];
+}
+
+// Sjednotí datum do tvaru YYYY-MM-DD, ať přijde v jakémkoliv formátu
+// (ISO "2026-06-16", ISO s časem, nebo "Mon Jun 22 2026 00:00:00 GMT+0200...").
+function normalizeDatum(d) {
+  if (!d) return '';
+  const s = String(d).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+  // Formát "Mon Jun 22 2026 ..." — vytáhneme měsíc, den a rok z textu
+  const mesice = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
+  const mm = s.match(/^\w{3}\s+(\w{3})\s+(\d{1,2})\s+(\d{4})/);
+  if (mm && mesice[mm[1]]) {
+    return mm[3] + '-' + mesice[mm[1]] + '-' + String(mm[2]).padStart(2,'0');
+  }
+  const parsed = new Date(s);
+  if (!isNaN(parsed.getTime())) {
+    const y = parsed.getFullYear();
+    const m = String(parsed.getMonth()+1).padStart(2,'0');
+    const day = String(parsed.getDate()).padStart(2,'0');
+    return y+'-'+m+'-'+day;
+  }
+  return s;
+}
+
 // Výpočet celkové odměny záznamu: úkol má pevnou částku, jinak hodiny × sazba
 function recordCost(r) {
   if (r.type === 'zaloha') return 0;
@@ -666,6 +699,7 @@ function checkPin() {
       updateManagerFilterChips();
       loadManagerData();
       fetchFromSheet(() => {
+        selectedMonth = mostRecentMonth(getData());
         loadManagerData();
       });
     } else {
@@ -677,6 +711,8 @@ function checkPin() {
       document.getElementById('w-ukol-datum').value = new Date().toISOString().split('T')[0];
       showScreen('worker-screen');
       fetchFromSheet(() => {
+        const myName = (worker.name||'').trim();
+        selectedMonth = mostRecentMonth(getData().filter(r => (r.worker||'').trim() === myName));
         loadWorkerHistory();
       });
     }
@@ -759,9 +795,14 @@ function fetchFromSheet(callback) {
   const cbName = 'jsonp_cb_' + Date.now();
   window[cbName] = function(response) {
     if (response && response.status === 'ok' && Array.isArray(response.data)) {
-      const remote = response.data;
-      remote.sort((a,b) => (b.ts||'').localeCompare(a.ts||''));
-      saveData(remote);
+      const remote = response.data.map(r => ({ ...r, datum: normalizeDatum(r.datum) }));
+      // Sloučení: Sheet je zdroj pravdy, ale lokální záznamy, které ještě
+      // nejsou v Sheetu, zůstanou zobrazené (nezmizí uživateli z očí).
+      const remoteIds = new Set(remote.map(r => String(r.id)));
+      const localOnly = getData().filter(r => !remoteIds.has(String(r.id)));
+      const merged = remote.concat(localOnly);
+      merged.sort((a,b) => (b.ts||'').localeCompare(a.ts||''));
+      saveData(merged);
     }
     delete window[cbName];
     document.head.removeChild(script);
@@ -822,6 +863,7 @@ async function submitVykaz(ev) {
 
   document.getElementById('success-detail').innerHTML =
     `<strong>${record.zakaz_name}</strong><br>${record.datum} · ${hours} h${km > 0 ? ' · ' + km + ' km' : ''} · ${record.cost.toLocaleString('cs-CZ')} Kč`;
+  selectedMonth = (datum||'').slice(0,7) || selectedMonth;
   showScreen('success-screen');
   document.getElementById('w-zakaz').value = '';
   document.getElementById('w-note').value = '';
@@ -886,6 +928,7 @@ async function submitZaloha(ev) {
 
   document.getElementById('success-detail').innerHTML =
     `Záloha <strong>${zalohaAmount.toLocaleString('cs-CZ')} Kč</strong> zaznamenána<br>${datum}`;
+  selectedMonth = (datum||'').slice(0,7) || selectedMonth;
   showScreen('success-screen');
   zalohaAmount = 1000;
   document.getElementById('w-zaloha-input').value = '1000';
@@ -929,6 +972,7 @@ async function submitUkol(ev) {
 
   document.getElementById('success-detail').innerHTML =
     `Úkol <strong>${ukolAmount.toLocaleString('cs-CZ')} Kč</strong> zaznamenán<br>${record.zakaz_name} · ${datum}`;
+  selectedMonth = (datum||'').slice(0,7) || selectedMonth;
   showScreen('success-screen');
   document.getElementById('w-ukol-zakaz').value = '';
   document.getElementById('w-ukol-popis').value = '';
@@ -940,7 +984,7 @@ function loadWorkerHistory() {
   const all = getData().filter(r => (r.worker||'').trim() === myName);
   const ym = selectedMonth;
   document.getElementById('hist-month-label').textContent = monthLabel(ym);
-  const monthData = all.filter(r => (r.datum||'').startsWith(ym));
+  const monthData = all.filter(r => normalizeDatum(r.datum).startsWith(ym));
 
   const monthHrs = monthData.filter(r=>r.type!=='zaloha'&&r.type!=='ukol').reduce((s,r) => s+(r.hours||0), 0);
   const monthOdmena = monthData.filter(r=>r.type!=='zaloha').reduce((s,r) => s+recordCost(r), 0);
@@ -954,7 +998,7 @@ function loadWorkerHistory() {
   document.getElementById('hist-month-kc').textContent = kDoplaceni.toLocaleString('cs-CZ') + ' Kč';
 
   const el = document.getElementById('history-list');
-  if (!monthData.length) { el.innerHTML = '<div class="empty-state">Žádné záznamy v tomto měsíci</div>'; return; }
+  if (!monthData.length) { el.innerHTML = '<div class="empty-state">Žádné záznamy v tomto měsíci.<br>Zkus přepnout měsíc šipkami ‹ › nahoře.</div>'; return; }
   el.innerHTML = monthData.map(r => {
     const schvaleno = r.approved ? ' <span style="color:#1D9E75;font-size:11px">✓ schváleno</span>' : '';
     if (r.type === 'zaloha') return `
@@ -1016,6 +1060,7 @@ async function submitMgrZaloha(ev) {
 
   document.getElementById('success-detail').innerHTML =
     `Záloha <strong>${mgrZalohaAmount.toLocaleString('cs-CZ')} Kč</strong> zaznamenána<br>${datum}`;
+  selectedMonth = (datum||'').slice(0,7) || selectedMonth;
   showScreen('success-screen');
   mgrZalohaAmount = 1000;
   document.getElementById('mgr-zaloha-input').value = '1000';
@@ -1059,6 +1104,7 @@ async function submitMgrUkol(ev) {
 
   document.getElementById('success-detail').innerHTML =
     `Úkol <strong>${mgrUkolAmount.toLocaleString('cs-CZ')} Kč</strong> zaznamenán<br>${record.zakaz_name} · ${datum}`;
+  selectedMonth = (datum||'').slice(0,7) || selectedMonth;
   showScreen('success-screen');
   document.getElementById('mgr-ukol-zakaz').value = '';
   document.getElementById('mgr-ukol-popis').value = '';
@@ -1148,6 +1194,7 @@ async function submitMgrVykaz(ev) {
 
   document.getElementById('success-detail').innerHTML =
     `<strong>${record.zakaz_name}</strong><br>${record.datum} · ${mgrHours} h${mgrKm > 0 ? ' · ' + mgrKm + ' km' : ''} · ${record.cost.toLocaleString('cs-CZ')} Kč`;
+  selectedMonth = (datum||'').slice(0,7) || selectedMonth;
   showScreen('success-screen');
   document.getElementById('mgr-zakaz').value = '';
   document.getElementById('mgr-note').value = '';
@@ -1180,7 +1227,7 @@ function loadManagerData() {
   const lbl = document.getElementById('mgr-month-label');
   if (lbl) lbl.textContent = monthLabel(ym);
 
-  const monthData = data.filter(r => (r.datum||'').startsWith(ym));
+  const monthData = data.filter(r => normalizeDatum(r.datum).startsWith(ym));
   const totalHrs = monthData.filter(r=>r.type!=='zaloha'&&r.type!=='ukol').reduce((s,r)=>s+(r.hours||0),0);
   const totalKc = monthData.filter(r=>r.type!=='zaloha').reduce((s,r)=>s+recordCost(r),0);
   const totalZalohy = monthData.filter(r=>r.type==='zaloha').reduce((s,r)=>s+(r.zaloha||0),0);
@@ -1374,7 +1421,7 @@ function editRecord(id) {
 
 function exportMonth() {
   const ym = selectedMonth;
-  const data = getData().filter(r => (r.datum||'').startsWith(ym));
+  const data = getData().filter(r => normalizeDatum(r.datum).startsWith(ym));
   if (!data.length) { alert('Žádné záznamy k exportu v měsíci ' + monthLabel(ym)); return; }
   const head = ['Datum','Pracovník','Typ','Zakázka','Hodiny','Km','Sazba','Odměna Kč','Záloha Kč','Schváleno','Poznámka'];
   const rows = data.map(r => {
@@ -1432,6 +1479,7 @@ function renderMgrZakazky() {
 
 // Init
 setToday();
+(function(){ var vl=document.getElementById('version-label'); if(vl) vl.textContent = 'Moje AMP · verze ' + APP_VERSION; })();
 </script>
 </body>
 </html>
